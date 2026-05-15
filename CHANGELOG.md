@@ -1,5 +1,12 @@
 # create-scaffold-hbar
 
+## 0.1.3
+
+### Patch Changes
+
+- dc9c448: Only support yarn package manager
+- add install hedera skills and manage external templates
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -10,4 +17,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Fresh changelog baseline for `create-scaffold-hbar`.
-
