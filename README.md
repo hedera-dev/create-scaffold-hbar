@@ -81,7 +81,7 @@ Use this when you’re working on the create-scaffold-hbar CLI itself.
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/hashgraph/create-scaffold-hbar.git
+git clone https://github.com/hedera-dev/create-scaffold-hbar.git
 cd create-scaffold-hbar
 yarn install
 ```

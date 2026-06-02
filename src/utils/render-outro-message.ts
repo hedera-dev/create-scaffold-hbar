@@ -98,6 +98,12 @@ export function renderOutroMessage(options: Options) {
   ${chalk.dim("cd")} ${chalk.white(options.project)}
 `;
 
+  if (options.solidityFramework === SOLIDITY_FRAMEWORKS.FOUNDRY) {
+    message += `
+  ${chalk.yellow("Note:")} Foundry (forge, cast, anvil) must be installed. See ${chalk.cyan("https://book.getfoundry.sh")}
+`;
+  }
+
   if (!options.install) {
     message += `
   ${chalk.bold("Install dependencies & format files")}

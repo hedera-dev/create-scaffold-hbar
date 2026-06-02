@@ -4,16 +4,14 @@
   "description": "Scaffold a Hedera dApp project",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hashgraph/create-scaffold-hbar.git"
+    "url": "git+https://github.com/hedera-dev/create-scaffold-hbar.git"
   },
   "main": "dist/cli.js",
   "type": "module",
-  "bin": {
-    "create-scaffold-hbar": "bin/create-scaffold-hbar.js"
-  },
+  "bin": "bin/create-scaffold-hbar.js",
   "files": [
-    "bin/create-scaffold-hbar.js",
-    "dist/cli.js"
+    "dist",
+    "bin"
   ],
   "scripts": {
     "build": "rollup -c rollup.config.js && node scripts/write-bin.js",
