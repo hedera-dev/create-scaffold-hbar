@@ -1,5 +1,11 @@
 # create-scaffold-hbar
 
+## 0.2.5
+
+### Patch Changes
+
+- 8736096: Update template select prompt labels: "Hedera Demo" → "Hedera Native", "Payments Scheduler" → "Onchain Cron Job", and "Tokenise Subscriptions" → "Tokenize Subscriptions".
+
 ## 0.1.3
 
 ### Patch Changes
