@@ -21,6 +21,17 @@ export const TEMPLATES = [
 export const TEMPLATES_FALLBACK = TEMPLATES;
 
 /**
+ * Display-name overrides for the template select prompt, keyed by template value
+ * (the branch suffix after "templates/"). When a value is present here, this label
+ * is shown instead of the auto-derived title-cased branch name.
+ */
+export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
+  "hedera-demo": "Hedera Native",
+  "payments-scheduler": "Onchain Cron Job",
+  "tokenise-subscriptions": "Tokenize Subscriptions",
+};
+
+/**
  * Local fallback capabilities for well-known templates.
  * Used when template manifest metadata can't be fetched.
  */

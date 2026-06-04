@@ -1,4 +1,4 @@
-import { TEMPLATE_BRANCH_PREFIX, TEMPLATE_REPO, TEMPLATES_FALLBACK } from "./consts";
+import { TEMPLATE_BRANCH_PREFIX, TEMPLATE_LABEL_OVERRIDES, TEMPLATE_REPO, TEMPLATES_FALLBACK } from "./consts";
 
 /** Branch name for the "blank" starter template (actual branch is blank-template). */
 const BLANK_TEMPLATE_BRANCH = "blank-template";
@@ -45,10 +45,12 @@ export async function fetchAvailableTemplates(): Promise<TemplateOption[]> {
         const match = r.ref?.match(/^refs\/heads\/templates\/(.+)$/);
         if (!match) return null;
         const value = match[1];
-        const label = value
-          .split(/[-_]/)
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .join(" ");
+        const label =
+          TEMPLATE_LABEL_OVERRIDES[value] ??
+          value
+            .split(/[-_]/)
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(" ");
         return { value, label };
       })
       .filter((o): o is TemplateOption => o != null)
