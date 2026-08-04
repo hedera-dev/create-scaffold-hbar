@@ -29,6 +29,7 @@ export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
   "hedera-demo": "Hedera Native",
   "payments-scheduler": "Onchain Cron Job",
   "tokenise-subscriptions": "Tokenize Subscriptions",
+  "x402-pay-per-use": "x402 Pay-Per-Use",
 };
 
 /**
@@ -65,6 +66,12 @@ export const TEMPLATE_CAPABILITIES_FALLBACK: Record<
     solidityFramework: ["none"],
     packageManager: ["yarn", "npm"],
     defaults: { frontend: "nextjs-app", solidityFramework: "none" },
+  },
+  "x402-pay-per-use": {
+    frontend: ["nextjs-app"],
+    solidityFramework: ["hardhat"],
+    packageManager: ["yarn", "npm"],
+    defaults: { frontend: "nextjs-app", solidityFramework: "hardhat", packageManager: "yarn" },
   },
 };
 
