@@ -491,10 +491,19 @@ export async function copyTemplateFiles(
 ): Promise<{ outroSteps?: string[]; outroInstallCommand?: string }> {
   const spec = getTemplateSpec(options.template as string);
   const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-scaffold-hbar-"));
+  /** Test/smoke seam: copy a local template tree instead of giget (unreleased recipe branches). */
+  const localTemplateDir = process.env.CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR?.trim();
 
   try {
-    await downloadTemplate(`gh:${spec}`, { dir: tmpDir });
-    await copyLocalTemplateTree(tmpDir, targetDir);
+    if (localTemplateDir) {
+      if (!fs.existsSync(localTemplateDir)) {
+        throw new Error(`CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR does not exist: ${localTemplateDir}`);
+      }
+      await copyLocalTemplateTree(path.resolve(localTemplateDir), targetDir);
+    } else {
+      await downloadTemplate(`gh:${spec}`, { dir: tmpDir });
+      await copyLocalTemplateTree(tmpDir, targetDir);
+    }
 
     removeUnselectedFrameworkPackages(targetDir, options.solidityFramework);
     if (options.frontend === "none") {

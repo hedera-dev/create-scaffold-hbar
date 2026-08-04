@@ -63,8 +63,8 @@ export const TEMPLATE_CAPABILITIES_FALLBACK: Record<
   "hedera-demo": {
     frontend: ["nextjs-app"],
     solidityFramework: ["none"],
-    packageManager: ["yarn", "npm"],
-    defaults: { frontend: "nextjs-app", solidityFramework: "none" },
+    packageManager: ["yarn"],
+    defaults: { frontend: "nextjs-app", solidityFramework: "none", packageManager: "yarn" },
   },
 };
 
