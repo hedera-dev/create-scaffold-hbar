@@ -1,0 +1,10 @@
+name: fixture-extend
+maxAttempts: 2
+# Baseline / validators intentionally use yarn; npm-mode rewrite must not touch this file.
+skills: []
+extend:
+  baseline:
+    - yarn install --immutable
+validation:
+  commands:
+    - yarn workspace @sh/nextjs test

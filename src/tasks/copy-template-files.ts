@@ -8,6 +8,11 @@ import fse from "fs-extra";
 import path from "path";
 import { getTemplateSpec } from "../utils/fetch-available-templates";
 import { SOLIDITY_FRAMEWORKS } from "../utils/consts";
+import {
+  restoreHarnessPackageFields,
+  shouldSkipNpmTextRewrite,
+  snapshotHarnessPackageFields,
+} from "../utils/harness-recipe";
 import { applyRenameMap } from "./apply-rename-map";
 import { generateEnvExample } from "./generate-env-example";
 
@@ -270,16 +275,29 @@ function replaceYarnReference(content: string): string {
   return next;
 }
 
-function updateTextFilesForNpm(targetDir: string, packageManager: PackageManager): void {
+/**
+ * Rewrites yarn→npm in project text files when scaffolding with npm.
+ * Skips the entire `.harness/` recipe tree so validator/spec commands stay intact.
+ * Exported for fixture-driven unit tests.
+ */
+export function updateTextFilesForNpm(targetDir: string, packageManager: PackageManager): void {
   if (packageManager !== "npm") return;
 
   const walk = (dir: string): void => {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
+      const relativePath = path.relative(targetDir, fullPath);
+
       if (entry.isDirectory()) {
         if (entry.name === ".git" || entry.name === "node_modules") continue;
+        // Do not rewrite tracked harness recipes (or ignored runtime dirs under .harness/).
+        if (shouldSkipNpmTextRewrite(relativePath)) continue;
         walk(fullPath);
+        continue;
+      }
+
+      if (shouldSkipNpmTextRewrite(relativePath)) {
         continue;
       }
 
@@ -329,8 +347,10 @@ const NEXTJS_SCRIPT_KEYS = [
  * Updates root package.json so workspaces and scripts only reference the
  * selected solidity framework and, when frontend is not "none", the nextjs package.
  * Also transforms scripts for the selected package manager.
+ * Preserves `harness:*` scripts and `hedera-harness` dependency pins.
+ * Exported for fixture-driven unit tests.
  */
-function filterRootPackageJson(
+export function filterRootPackageJson(
   targetDir: string,
   selectedFramework: SolidityFramework | null | undefined,
   frontend: Options["frontend"],
@@ -340,6 +360,7 @@ function filterRootPackageJson(
   if (!fs.existsSync(pkgPath)) return;
 
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8")) as Record<string, unknown>;
+  const harnessSnapshot = snapshotHarnessPackageFields(pkg);
 
   const unselected = [SOLIDITY_FRAMEWORKS.FOUNDRY, SOLIDITY_FRAMEWORKS.HARDHAT].filter(sf => sf !== selectedFramework);
 
@@ -429,7 +450,34 @@ function filterRootPackageJson(
   }
   // For yarn, keep the template's packageManager field as-is
 
+  // Ensure harness scripts/deps survive filtering; keep post-transform script bodies
+  // (e.g. `yarn harness:extend` → `npm run harness:extend` in npm mode).
+  const transformedHarnessScripts: Record<string, string> = {};
+  if (pkg.scripts && typeof pkg.scripts === "object") {
+    for (const key of Object.keys(harnessSnapshot.scripts)) {
+      const value = (pkg.scripts as Record<string, string>)[key];
+      if (typeof value === "string") {
+        transformedHarnessScripts[key] = value;
+      }
+    }
+  }
+  restoreHarnessPackageFields(pkg, harnessSnapshot, transformedHarnessScripts);
+
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), "utf8");
+}
+
+/**
+ * Copies a local template tree into `targetDir` the same way giget results are
+ * copied (including dot directories like `.harness/`). Used by tests; production
+ * still downloads via giget then uses the same `fse.copy` behavior.
+ */
+export async function copyLocalTemplateTree(sourceDir: string, targetDir: string): Promise<void> {
+  const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const src = path.join(sourceDir, entry.name);
+    const dest = path.join(targetDir, entry.name);
+    await fse.copy(src, dest, { overwrite: true });
+  }
 }
 
 /**
@@ -446,13 +494,7 @@ export async function copyTemplateFiles(
 
   try {
     await downloadTemplate(`gh:${spec}`, { dir: tmpDir });
-
-    const entries = fs.readdirSync(tmpDir, { withFileTypes: true });
-    for (const entry of entries) {
-      const src = path.join(tmpDir, entry.name);
-      const dest = path.join(targetDir, entry.name);
-      await fse.copy(src, dest, { overwrite: true });
-    }
+    await copyLocalTemplateTree(tmpDir, targetDir);
 
     removeUnselectedFrameworkPackages(targetDir, options.solidityFramework);
     if (options.frontend === "none") {
