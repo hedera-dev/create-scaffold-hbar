@@ -75,6 +75,38 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
     expect(fs.existsSync(path.join(targetDir, ".harness", "validators", "smoke.json"))).toBe(true);
   });
 
+  it("skips .git, node_modules, .next, and .env from a live template checkout", async () => {
+    const dirty = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-hbar-dirty-"));
+    const out = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-hbar-out-"));
+    try {
+      fs.mkdirSync(path.join(dirty, ".git"));
+      fs.writeFileSync(path.join(dirty, ".git", "HEAD"), "ref: refs/heads/main\n");
+      fs.mkdirSync(path.join(dirty, "node_modules", "left-pad"), { recursive: true });
+      fs.writeFileSync(path.join(dirty, "node_modules", "left-pad", "index.js"), "module.exports=1");
+      fs.mkdirSync(path.join(dirty, "packages", "nextjs", ".next"), { recursive: true });
+      fs.writeFileSync(path.join(dirty, "packages", "nextjs", ".next", "trace"), "x");
+      fs.writeFileSync(path.join(dirty, ".env"), "SECRET=1\n");
+      fs.mkdirSync(path.join(dirty, "packages", "nextjs"), { recursive: true });
+      fs.writeFileSync(path.join(dirty, "packages", "nextjs", ".env"), "SECRET=2\n");
+      fs.mkdirSync(path.join(dirty, ".harness"), { recursive: true });
+      fs.writeFileSync(path.join(dirty, ".harness", "spec.yaml"), "name: keep\n");
+      fs.writeFileSync(path.join(dirty, "README.md"), "ok\n");
+
+      await copyLocalTemplateTree(dirty, out);
+
+      expect(fs.existsSync(path.join(out, ".harness", "spec.yaml"))).toBe(true);
+      expect(fs.existsSync(path.join(out, "README.md"))).toBe(true);
+      expect(fs.existsSync(path.join(out, ".git"))).toBe(false);
+      expect(fs.existsSync(path.join(out, "node_modules"))).toBe(false);
+      expect(fs.existsSync(path.join(out, "packages", "nextjs", ".next"))).toBe(false);
+      expect(fs.existsSync(path.join(out, ".env"))).toBe(false);
+      expect(fs.existsSync(path.join(out, "packages", "nextjs", ".env"))).toBe(false);
+    } finally {
+      await fs.promises.rm(dirty, { recursive: true, force: true });
+      await fs.promises.rm(out, { recursive: true, force: true });
+    }
+  });
+
   it("keeps harness:extend and hedera-harness through yarn root package filtering", () => {
     filterRootPackageJson(targetDir, SOLIDITY_FRAMEWORKS.HARDHAT, "nextjs-app", "yarn");
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));

@@ -466,17 +466,36 @@ export function filterRootPackageJson(
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2), "utf8");
 }
 
+/** Top-level / nested paths that must never land in a scaffolded project. */
+const LOCAL_TEMPLATE_COPY_SKIP_BASENAMES = new Set([".git", "node_modules", ".next", ".env"]);
+
+function shouldCopyLocalTemplatePath(srcPath: string): boolean {
+  const base = path.basename(srcPath);
+  if (LOCAL_TEMPLATE_COPY_SKIP_BASENAMES.has(base)) return false;
+  // Yarn PnP / berry cache can be huge and is not part of the template recipe.
+  if (base === "cache") {
+    const parent = path.basename(path.dirname(srcPath));
+    if (parent === ".yarn") return false;
+  }
+  return true;
+}
+
 /**
  * Copies a local template tree into `targetDir` the same way giget results are
- * copied (including dot directories like `.harness/`). Used by tests; production
- * still downloads via giget then uses the same `fse.copy` behavior.
+ * copied (including dot directories like `.harness/`). Used by tests and the
+ * CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR seam. Skips `.git`, deps, build output, and
+ * `.env` so a live checkout of scaffold-hbar does not poison the new project.
  */
 export async function copyLocalTemplateTree(sourceDir: string, targetDir: string): Promise<void> {
   const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
   for (const entry of entries) {
+    if (!shouldCopyLocalTemplatePath(path.join(sourceDir, entry.name))) continue;
     const src = path.join(sourceDir, entry.name);
     const dest = path.join(targetDir, entry.name);
-    await fse.copy(src, dest, { overwrite: true });
+    await fse.copy(src, dest, {
+      overwrite: true,
+      filter: shouldCopyLocalTemplatePath,
+    });
   }
 }
 
@@ -521,8 +540,9 @@ export async function copyTemplateFiles(
 
     const outro = processTemplateManifest(targetDir, options.project);
 
-    await execa("git", ["init"], { cwd: targetDir });
-    await execa("git", ["checkout", "-b", "main"], { cwd: targetDir });
+    // `-b main` avoids failing when init.defaultBranch is already `main`
+    // (plain `git init` + `checkout -b main` errors with "branch already exists").
+    await execa("git", ["init", "-b", "main"], { cwd: targetDir });
 
     return outro ?? {};
   } finally {
