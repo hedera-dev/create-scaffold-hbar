@@ -14,11 +14,52 @@ The CLI uses **giget** to download the chosen template. There are **no embedded 
 Optional `create-scaffold-hbar.outro.steps` is a non-empty array of lines inserted **after** the shared header (`Congratulations`, `cd`, optional install hint) and **before** the closing thanks line. It **replaces** the default contract/frontend-specific middle section when present.
 
 - **`+` prefix**: render the rest of the line in bold.
-- **`{run:script}`**: expanded to the correct package-manager command (e.g. `{run:next:start}` → `yarn next:start`, `npm run next:start`).
+- **`{run:script}`**: expanded to the correct package-manager command (e.g. `{run:next:start}` → `yarn next:start`, `npm run next:start`). For harness pilots, use `{run:harness:extend}`.
 
 Omit `outro` to keep the standard Scaffold-HBAR next-steps text.
+
+## Optional `.harness/` recipes (hedera-harness)
+
+Templates may ship a tracked **`.harness/`** directory (spec, PRD, validators, contracts) plus root package wiring:
+
+```json
+{
+  "scripts": {
+    "harness:extend": "hedera-harness extend .harness/spec.yaml"
+  },
+  "devDependencies": {
+    "hedera-harness": "1.1.0"
+  }
+}
+```
+
+`create-scaffold-hbar` guarantees:
+
+- Dot directories such as `.harness/` are copied into the project (same as other template files).
+- npm-mode yarn→npm text rewrite **does not** modify files under `.harness/`, so recipe validator commands (often `yarn …`) are not silently rewritten.
+- Root `harness:*` scripts and the `hedera-harness` dependency survive workspace/script filtering for solidity/frontend selection.
+
+Ignore runtime paths in the template (do **not** commit them): `.harness/runs/`, `.harness/cache/`, `.harness/runtime/`, `.skill-cache/`. Keep the tracked recipe files.
+
+Outro tip for harness-enabled templates:
+
+```json
+{
+  "create-scaffold-hbar": {
+    "outro": {
+      "steps": ["+Extend this app with the harness: {run:harness:extend}"]
+    }
+  }
+}
+```
+
+## Template registry ownership
+
+Built-in template resolution uses `TEMPLATE_REPO` in `src/utils/consts.ts` (currently `buidler-labs/scaffold-hbar`). The published CLI package metadata points at `hedera-dev/create-scaffold-hbar`. Before releasing a harness pilot that depends on a new `templates/*` branch, confirm the branch exists on the registry repo actually used by `getTemplateSpec()` (or update `TEMPLATE_REPO` deliberately and retest listing + giget download).
 
 ## See also
 
 - `src/utils/fetch-available-templates.ts` — `getTemplateSpec()`, `fetchAvailableTemplates()`
 - `src/tasks/copy-template-files.ts` — giget download + `processTemplateManifest()`
+- `src/utils/harness-recipe.ts` — `.harness/` preservation helpers
+- `tests/unit/harness-recipe-preservation.test.ts` — fixture coverage for copy/filter/npm rewrite

@@ -1,0 +1,4 @@
+{
+  "command": "yarn workspace @sh/nextjs lint",
+  "description": "Recipe JSON must keep yarn under npm scaffolding"
+}

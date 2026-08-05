@@ -1,0 +1,21 @@
+{
+  "name": "harness-template-fixture",
+  "private": true,
+  "workspaces": [
+    "packages/nextjs",
+    "packages/hardhat",
+    "packages/foundry"
+  ],
+  "scripts": {
+    "format": "yarn next:format && yarn hardhat:format && yarn foundry:format",
+    "hardhat:compile": "yarn workspace @sh/hardhat compile",
+    "foundry:compile": "yarn workspace @sh/foundry compile",
+    "next:start": "yarn workspace @sh/nextjs start",
+    "harness:extend": "hedera-harness extend .harness/spec.yaml"
+  },
+  "devDependencies": {
+    "hedera-harness": "1.1.0",
+    "husky": "^8.0.0"
+  },
+  "packageManager": "yarn@3.5.0"
+}
