@@ -74,29 +74,29 @@ describe("renderOutroMessage", () => {
     expect(text).toContain("Thanks for using Scaffold-HBAR");
   });
 
-  it("expands {run:harness:extend} for yarn and npm outro steps", () => {
+  it("expands {run:harness:run} for yarn and npm outro steps", () => {
     const yarnLog = vi.spyOn(console, "log").mockImplementation(() => {});
     renderOutroMessage(
       baseOptions({
-        outroSteps: ["+Extend with the harness: {run:harness:extend}"],
+        outroSteps: ["+Run the harness recipe: {run:harness:run}"],
         solidityFramework: null,
         packageManager: "yarn",
       }),
     );
-    expect(yarnLog.mock.calls.map(c => c.join("")).join("\n")).toContain("yarn harness:extend");
+    expect(yarnLog.mock.calls.map(c => c.join("")).join("\n")).toContain("yarn harness:run");
     yarnLog.mockRestore();
 
     const npmLog = vi.spyOn(console, "log").mockImplementation(() => {});
     renderOutroMessage(
       baseOptions({
-        outroSteps: ["+Extend with the harness: {run:harness:extend}"],
+        outroSteps: ["+Run the harness recipe: {run:harness:run}"],
         solidityFramework: null,
         packageManager: "npm",
       }),
     );
     const npmText = npmLog.mock.calls.map(c => c.join("")).join("\n");
-    expect(npmText).toContain("npm run harness:extend");
-    expect(npmText).not.toContain("yarn harness:extend");
+    expect(npmText).toContain("npm run harness:run");
+    expect(npmText).not.toContain("yarn harness:run");
   });
 
   it("uses npm commands when npm package manager is selected", () => {

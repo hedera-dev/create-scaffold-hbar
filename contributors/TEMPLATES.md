@@ -14,7 +14,7 @@ The CLI uses **giget** to download the chosen template. There are **no embedded 
 Optional `create-scaffold-hbar.outro.steps` is a non-empty array of lines inserted **after** the shared header (`Congratulations`, `cd`, optional install hint) and **before** the closing thanks line. It **replaces** the default contract/frontend-specific middle section when present.
 
 - **`+` prefix**: render the rest of the line in bold.
-- **`{run:script}`**: expanded to the correct package-manager command (e.g. `{run:next:start}` → `yarn next:start`, `npm run next:start`). For harness pilots, use `{run:harness:extend}`.
+- **`{run:script}`**: expanded to the correct package-manager command (e.g. `{run:next:start}` → `yarn next:start`, `npm run next:start`). For harness pilots, use `{run:harness:run}`.
 
 Omit `outro` to keep the standard Scaffold-HBAR next-steps text.
 
@@ -25,10 +25,10 @@ Templates may ship a tracked **`.harness/`** directory (spec, PRD, validators, c
 ```json
 {
   "scripts": {
-    "harness:extend": "hedera-harness extend .harness/spec.yaml"
+    "harness:run": "hedera-harness run .harness/spec.yaml"
   },
   "devDependencies": {
-    "hedera-harness": "1.1.0"
+    "hedera-harness": "1.1.1"
   }
 }
 ```
@@ -47,7 +47,7 @@ Outro tip for harness-enabled templates:
 {
   "create-scaffold-hbar": {
     "outro": {
-      "steps": ["+Extend this app with the harness: {run:harness:extend}"]
+      "steps": ["+Run the harness recipe: {run:harness:run}"]
     }
   }
 }

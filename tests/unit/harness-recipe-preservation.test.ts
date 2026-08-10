@@ -38,7 +38,7 @@ describe("harness package field snapshot/restore", () => {
   it("restores harness scripts and hedera-harness when filtering drops them", () => {
     const pkg: Record<string, unknown> = {
       scripts: {
-        "harness:extend": "hedera-harness extend .harness/spec.yaml",
+        "harness:run": "hedera-harness run .harness/spec.yaml",
         format: "yarn format",
       },
       devDependencies: {
@@ -47,12 +47,12 @@ describe("harness package field snapshot/restore", () => {
       },
     };
     const snapshot = snapshotHarnessPackageFields(pkg);
-    delete (pkg.scripts as Record<string, string>)["harness:extend"];
+    delete (pkg.scripts as Record<string, string>)["harness:run"];
     delete (pkg.devDependencies as Record<string, string>)["hedera-harness"];
     restoreHarnessPackageFields(pkg, snapshot, {
-      "harness:extend": "npm run harness:extend",
+      "harness:run": "npm run harness:run",
     });
-    expect((pkg.scripts as Record<string, string>)["harness:extend"]).toBe("npm run harness:extend");
+    expect((pkg.scripts as Record<string, string>)["harness:run"]).toBe("npm run harness:run");
     expect((pkg.devDependencies as Record<string, string>)["hedera-harness"]).toBe("1.1.0");
   });
 });
@@ -107,10 +107,10 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
     }
   });
 
-  it("keeps harness:extend and hedera-harness through yarn root package filtering", () => {
+  it("keeps harness:run and hedera-harness through yarn root package filtering", () => {
     filterRootPackageJson(targetDir, SOLIDITY_FRAMEWORKS.HARDHAT, "nextjs-app", "yarn");
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
-    expect(pkg.scripts["harness:extend"]).toBe("hedera-harness extend .harness/spec.yaml");
+    expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
     expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
     expect(pkg.scripts["foundry:compile"]).toBeUndefined();
   });
@@ -124,7 +124,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
     updateTextFilesForNpm(targetDir, "npm");
 
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
-    expect(pkg.scripts["harness:extend"]).toBe("hedera-harness extend .harness/spec.yaml");
+    expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
     expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
 
     expect(fs.readFileSync(path.join(targetDir, ".harness", "spec.yaml"), "utf8")).toBe(originalSpec);
@@ -143,7 +143,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
   it("preserves harness fields when frontend/solidity filtering is aggressive", () => {
     filterRootPackageJson(targetDir, null, "none", "npm");
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
-    expect(pkg.scripts["harness:extend"]).toBe("hedera-harness extend .harness/spec.yaml");
+    expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
     expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
     // Unselected solidity scripts are stripped; harness wiring must remain.
     expect(pkg.scripts["hardhat:compile"]).toBeUndefined();

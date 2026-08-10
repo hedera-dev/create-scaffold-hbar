@@ -451,7 +451,7 @@ export function filterRootPackageJson(
   // For yarn, keep the template's packageManager field as-is
 
   // Ensure harness scripts/deps survive filtering; keep post-transform script bodies
-  // (e.g. `yarn harness:extend` → `npm run harness:extend` in npm mode).
+  // (e.g. `yarn harness:run` → `npm run harness:run` in npm mode).
   const transformedHarnessScripts: Record<string, string> = {};
   if (pkg.scripts && typeof pkg.scripts === "object") {
     for (const key of Object.keys(harnessSnapshot.scripts)) {

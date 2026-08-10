@@ -23,7 +23,7 @@ export function shouldSkipNpmTextRewrite(relativePath: string): boolean {
 
 /** Root package script keys owned by hedera-harness (must survive package filtering). */
 export function isHarnessScriptKey(scriptKey: string): boolean {
-  return scriptKey === "harness:extend" || scriptKey.startsWith("harness:");
+  return scriptKey.startsWith("harness:");
 }
 
 export function isHederaHarnessPackageName(name: string): boolean {
@@ -68,7 +68,7 @@ export function snapshotHarnessPackageFields(pkg: Record<string, unknown>): {
 /**
  * Restore harness scripts/deps after root package filtering.
  * Script values are taken from `transformedScripts` when present (so yarn→npm
- * rewrite of `harness:extend` is kept); otherwise the pre-filter snapshot is used.
+ * rewrite of `harness:run` is kept); otherwise the pre-filter snapshot is used.
  */
 export function restoreHarnessPackageFields(
   pkg: Record<string, unknown>,
