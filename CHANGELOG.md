@@ -1,5 +1,11 @@
 # create-scaffold-hbar
 
+## 0.2.8
+
+### Patch Changes
+
+- Align harness handoff with `harness:run` / hedera-harness project-centric flow (replacing the legacy `harness:extend` naming in docs, fixtures, and recipe preservation).
+
 ## 0.2.5
 
 ### Patch Changes

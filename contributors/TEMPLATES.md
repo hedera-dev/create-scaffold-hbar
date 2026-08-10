@@ -28,7 +28,7 @@ Templates may ship a tracked **`.harness/`** directory (spec, PRD, validators, c
     "harness:run": "hedera-harness run .harness/spec.yaml"
   },
   "devDependencies": {
-    "hedera-harness": "1.1.1"
+    "hedera-harness": "1.1.2"
   }
 }
 ```
@@ -47,7 +47,7 @@ Outro tip for harness-enabled templates:
 {
   "create-scaffold-hbar": {
     "outro": {
-      "steps": ["+Run the harness recipe: {run:harness:run}"]
+      "steps": ["+To further develop this template with our agentic harness: {run:harness:run}"]
     }
   }
 }

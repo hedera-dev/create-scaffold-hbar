@@ -14,7 +14,7 @@
     "harness:run": "hedera-harness run .harness/spec.yaml"
   },
   "devDependencies": {
-    "hedera-harness": "1.1.0",
+    "hedera-harness": "1.1.2",
     "husky": "^8.0.0"
   },
   "packageManager": "yarn@3.5.0"

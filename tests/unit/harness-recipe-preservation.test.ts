@@ -42,7 +42,7 @@ describe("harness package field snapshot/restore", () => {
         format: "yarn format",
       },
       devDependencies: {
-        "hedera-harness": "1.1.0",
+        "hedera-harness": "1.1.2",
         husky: "^8.0.0",
       },
     };
@@ -53,7 +53,7 @@ describe("harness package field snapshot/restore", () => {
       "harness:run": "npm run harness:run",
     });
     expect((pkg.scripts as Record<string, string>)["harness:run"]).toBe("npm run harness:run");
-    expect((pkg.devDependencies as Record<string, string>)["hedera-harness"]).toBe("1.1.0");
+    expect((pkg.devDependencies as Record<string, string>)["hedera-harness"]).toBe("1.1.2");
   });
 });
 
@@ -111,7 +111,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
     filterRootPackageJson(targetDir, SOLIDITY_FRAMEWORKS.HARDHAT, "nextjs-app", "yarn");
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
     expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
-    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
+    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.2");
     expect(pkg.scripts["foundry:compile"]).toBeUndefined();
   });
 
@@ -125,7 +125,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
 
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
     expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
-    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
+    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.2");
 
     expect(fs.readFileSync(path.join(targetDir, ".harness", "spec.yaml"), "utf8")).toBe(originalSpec);
     expect(fs.readFileSync(path.join(targetDir, ".harness", "prd.md"), "utf8")).toBe(originalPrd);
@@ -144,7 +144,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
     filterRootPackageJson(targetDir, null, "none", "npm");
     const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, "package.json"), "utf8"));
     expect(pkg.scripts["harness:run"]).toBe("hedera-harness run .harness/spec.yaml");
-    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.0");
+    expect(pkg.devDependencies["hedera-harness"]).toBe("1.1.2");
     // Unselected solidity scripts are stripped; harness wiring must remain.
     expect(pkg.scripts["hardhat:compile"]).toBeUndefined();
     expect(pkg.scripts["foundry:compile"]).toBeUndefined();
