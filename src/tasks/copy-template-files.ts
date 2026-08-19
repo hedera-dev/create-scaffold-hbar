@@ -1,7 +1,7 @@
 import { execa } from "execa";
 import { downloadTemplate } from "giget";
 import { Options, TemplateManifestSchema, PackageManager } from "../types";
-import type { SolidityFramework } from "../types";
+import type { SolidityFramework, TemplateOutroSection } from "../types";
 import fs from "fs";
 import os from "os";
 import fse from "fs-extra";
@@ -13,6 +13,7 @@ import {
   shouldSkipNpmTextRewrite,
   snapshotHarnessPackageFields,
 } from "../utils/harness-recipe";
+import { resolveOutroSections } from "../utils/outro-model";
 import { applyRenameMap } from "./apply-rename-map";
 import { generateEnvExample } from "./generate-env-example";
 
@@ -160,7 +161,7 @@ function normalizeWorkspacePackagesForNpm(
 function processTemplateManifest(
   projectDir: string,
   projectName: string,
-): { outroSteps?: string[]; outroInstallCommand?: string } | undefined {
+): { outroSections?: TemplateOutroSection[]; outroInstallCommand?: string } | undefined {
   const manifestPath = path.join(projectDir, TEMPLATE_MANIFEST_FILENAME);
   if (!fs.existsSync(manifestPath)) return undefined;
 
@@ -168,7 +169,7 @@ function processTemplateManifest(
   const manifest = TemplateManifestSchema.parse(raw);
   const createScaffoldHbar = manifest["create-scaffold-hbar"];
 
-  const outroSteps = createScaffoldHbar?.outro?.steps;
+  const outroSections = createScaffoldHbar?.outro ? resolveOutroSections(createScaffoldHbar.outro) : undefined;
   const outroInstallCommand = createScaffoldHbar?.outro?.installCommand;
 
   if (createScaffoldHbar?.rename) {
@@ -180,8 +181,8 @@ function processTemplateManifest(
 
   fs.unlinkSync(manifestPath);
 
-  const result: { outroSteps?: string[]; outroInstallCommand?: string } = {};
-  if (outroSteps?.length) result.outroSteps = [...outroSteps];
+  const result: { outroSections?: TemplateOutroSection[]; outroInstallCommand?: string } = {};
+  if (outroSections?.length) result.outroSections = outroSections;
   if (outroInstallCommand?.trim()) result.outroInstallCommand = outroInstallCommand.trim();
   return Object.keys(result).length > 0 ? result : undefined;
 }
@@ -507,7 +508,7 @@ export async function copyLocalTemplateTree(sourceDir: string, targetDir: string
 export async function copyTemplateFiles(
   options: Options,
   targetDir: string,
-): Promise<{ outroSteps?: string[]; outroInstallCommand?: string }> {
+): Promise<{ outroSections?: TemplateOutroSection[]; outroInstallCommand?: string }> {
   const spec = getTemplateSpec(options.template as string);
   const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-scaffold-hbar-"));
   /** Test/smoke seam: copy a local template tree instead of giget (unreleased recipe branches). */

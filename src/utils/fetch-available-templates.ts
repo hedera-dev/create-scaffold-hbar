@@ -1,4 +1,5 @@
 import { TEMPLATE_BRANCH_PREFIX, TEMPLATE_LABEL_OVERRIDES, TEMPLATE_REPO, TEMPLATES_FALLBACK } from "./consts";
+import { TEMPLATES } from "./template-registry";
 
 /** Branch name for the "blank" starter template (actual branch is blank-template). */
 const BLANK_TEMPLATE_BRANCH = "blank-template";
@@ -18,14 +19,54 @@ export function getTemplateSpec(template: string): string {
 
 export type TemplateOption = { value: string; label: string; hint?: string };
 
+function registryOptions(): TemplateOption[] {
+  return TEMPLATES.map(t => ({ ...t }));
+}
+
+function titleCaseBranch(value: string): string {
+  return value
+    .split(/[-_]/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/**
+ * Normalizes a live branch suffix to the CLI template value.
+ * `blank-template` is exposed as `blank` to match defaults and the registry.
+ */
+export function normalizeTemplateValue(branchSuffix: string): string {
+  return branchSuffix === BLANK_TEMPLATE_BRANCH ? "blank" : branchSuffix;
+}
+
+/**
+ * Merges the built-in registry with any extra live `templates/*` branches.
+ * Registry entries always win for known values (labels/hints stay stable).
+ */
+export function mergeTemplateOptions(registry: TemplateOption[], live: TemplateOption[]): TemplateOption[] {
+  const byValue = new Map<string, TemplateOption>();
+  for (const option of registry) {
+    byValue.set(option.value, option);
+  }
+  for (const option of live) {
+    if (!byValue.has(option.value)) {
+      byValue.set(option.value, option);
+    }
+  }
+  return [...byValue.values()].sort((a, b) => a.value.localeCompare(b.value));
+}
+
 /**
  * Fetches branch names from the template repo that match "templates/*"
- * and returns options for the interactive prompt.
- * Uses GitHub API matching-refs; falls back to TEMPLATES_FALLBACK on error (e.g. offline).
+ * and merges them with the built-in registry.
+ *
+ * Known starters always come from the registry (no GitHub required for the menu).
+ * A successful live fetch only adds branches not yet shipped in the CLI registry.
+ * On API failure, returns the registry list unchanged.
  */
 export async function fetchAvailableTemplates(): Promise<TemplateOption[]> {
+  const registry = registryOptions();
   const [owner, repo] = TEMPLATE_REPO.split("/");
-  if (!owner || !repo) return [...TEMPLATES_FALLBACK];
+  if (!owner || !repo) return registry.length > 0 ? registry : [...TEMPLATES_FALLBACK];
 
   const refPrefix = `heads/${TEMPLATE_BRANCH_PREFIX.replace(/\/$/, "")}`;
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/matching-refs/${refPrefix}`;
@@ -35,29 +76,23 @@ export async function fetchAvailableTemplates(): Promise<TemplateOption[]> {
       headers: { Accept: "application/vnd.github+json" },
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) return [...TEMPLATES_FALLBACK];
+    if (!res.ok) return registry;
 
     const refs: { ref: string }[] = await res.json();
-    if (!Array.isArray(refs) || refs.length === 0) return [...TEMPLATES_FALLBACK];
+    if (!Array.isArray(refs) || refs.length === 0) return registry;
 
-    const options: TemplateOption[] = refs
+    const live: TemplateOption[] = refs
       .map(r => {
         const match = r.ref?.match(/^refs\/heads\/templates\/(.+)$/);
         if (!match) return null;
-        const value = match[1];
-        const label =
-          TEMPLATE_LABEL_OVERRIDES[value] ??
-          value
-            .split(/[-_]/)
-            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-            .join(" ");
+        const value = normalizeTemplateValue(match[1]);
+        const label = TEMPLATE_LABEL_OVERRIDES[match[1]] ?? TEMPLATE_LABEL_OVERRIDES[value] ?? titleCaseBranch(value);
         return { value, label };
       })
-      .filter((o): o is TemplateOption => o != null)
-      .sort((a, b) => a.value.localeCompare(b.value));
+      .filter((o): o is TemplateOption => o != null);
 
-    return options.length > 0 ? options : [...TEMPLATES_FALLBACK];
+    return mergeTemplateOptions(registry, live);
   } catch {
-    return [...TEMPLATES_FALLBACK];
+    return registry;
   }
 }

@@ -1,7 +1,8 @@
 import type { Frontend, PackageManager, SolidityFramework, TemplateManifest } from "../types";
 import { TemplateManifestSchema } from "../types";
-import { TEMPLATE_CAPABILITIES_FALLBACK, TEMPLATE_REPO } from "./consts";
+import { TEMPLATE_REPO } from "./consts";
 import { parseGithubCommunityTemplate } from "./parse-github-template-ref";
+import { getRegistryCapabilities } from "./template-registry";
 
 const BLANK_TEMPLATE_BRANCH = "blank-template";
 
@@ -44,18 +45,14 @@ function fromManifest(manifest: TemplateManifest): TemplateCapabilities | null {
   };
 }
 
-function fromFallback(template: string): TemplateCapabilities {
-  const fallback = TEMPLATE_CAPABILITIES_FALLBACK[template];
-  if (!fallback) return DEFAULT_CAPABILITIES;
+function fromRegistry(template: string): TemplateCapabilities | undefined {
+  const caps = getRegistryCapabilities(template);
+  if (!caps) return undefined;
   return {
-    frontend: fallback.frontend ?? DEFAULT_CAPABILITIES.frontend,
-    solidityFramework: fallback.solidityFramework ?? DEFAULT_CAPABILITIES.solidityFramework,
-    packageManager: fallback.packageManager ?? DEFAULT_CAPABILITIES.packageManager,
-    defaults: {
-      frontend: fallback.defaults?.frontend,
-      solidityFramework: fallback.defaults?.solidityFramework,
-      packageManager: fallback.defaults?.packageManager,
-    },
+    frontend: caps.frontend,
+    solidityFramework: caps.solidityFramework,
+    packageManager: caps.packageManager,
+    defaults: { ...caps.defaults },
   };
 }
 
@@ -86,10 +83,11 @@ async function fetchTemplateManifestFromGithub(
 }
 
 /**
- * Resolves prompt capabilities for a template from remote template.json metadata.
- * Built-in keys (`blank`, …) read `template.json` on `templates/<name>` in {@link TEMPLATE_REPO}.
- * Community refs (`owner/repo#ref`) read `template.json` on that ref (same branch giget will fetch).
- * Falls back to local defaults when the manifest is missing or invalid.
+ * Resolves prompt capabilities for a template.
+ *
+ * Built-in registry entries are returned without calling GitHub (rate-limit safe).
+ * Community refs (`owner/repo#ref`) and unknown starters still load `template.json`
+ * from GitHub when possible, then fall back to permissive defaults.
  */
 export async function resolveTemplateCapabilities(template: string): Promise<TemplateCapabilities> {
   const community = parseGithubCommunityTemplate(template);
@@ -102,13 +100,16 @@ export async function resolveTemplateCapabilities(template: string): Promise<Tem
     return DEFAULT_CAPABILITIES;
   }
 
+  const registered = fromRegistry(template);
+  if (registered) return registered;
+
   const [owner, repo] = TEMPLATE_REPO.split("/");
-  if (!owner || !repo) return fromFallback(template);
+  if (!owner || !repo) return DEFAULT_CAPABILITIES;
 
   const branch = `templates/${branchNameForTemplate(template)}`;
   const manifest = await fetchTemplateManifestFromGithub(owner, repo, branch);
   if (manifest) {
-    return fromManifest(manifest) ?? fromFallback(template);
+    return fromManifest(manifest) ?? DEFAULT_CAPABILITIES;
   }
-  return fromFallback(template);
+  return DEFAULT_CAPABILITIES;
 }

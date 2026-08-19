@@ -79,15 +79,34 @@ describe("TEMPLATES", () => {
     expect(TEMPLATES.map(t => t.value)).toContain("blank");
   });
 
-  it("defaults to a single built-in fallback template", () => {
+  it("lists known starter templates from the registry", () => {
     const values = TEMPLATES.map(t => t.value);
-    expect(values).toEqual(["blank"]);
+    expect(values).toEqual([
+      "blank",
+      "bridge",
+      "cross-chain-dca",
+      "hedera-demo",
+      "oracles",
+      "payments-scheduler",
+      "tokenise-subscriptions",
+      "x402-pay-per-use",
+    ]);
   });
 
   it("every template has a non-empty label", () => {
     for (const t of TEMPLATES) {
       expect(t.label.length).toBeGreaterThan(0);
     }
+  });
+
+  it("keeps capabilities in sync for every listed template", async () => {
+    const { TEMPLATE_REGISTRY, TEMPLATE_CAPABILITIES_FALLBACK } = await import("../../src/utils/template-registry");
+    for (const entry of TEMPLATE_REGISTRY) {
+      expect(TEMPLATE_CAPABILITIES_FALLBACK[entry.value]).toEqual(entry.capabilities);
+    }
+    expect(TEMPLATE_CAPABILITIES_FALLBACK["blank-template"]).toEqual(
+      TEMPLATE_REGISTRY.find(e => e.value === "blank")?.capabilities,
+    );
   });
 });
 
