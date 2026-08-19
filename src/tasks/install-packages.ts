@@ -1,8 +1,9 @@
 import { DefaultRenderer, ListrTaskWrapper, SimpleRenderer } from "listr2";
-import { execa, execaCommand } from "execa";
+import { execa } from "execa";
 import chalk from "chalk";
 import type { PackageManager } from "../types";
 import { InstallError } from "../utils/errors";
+import { runTaskCommand } from "../utils/run-task-command";
 
 const INSTALL_ARGS: Record<Exclude<PackageManager, "none">, string[]> = {
   yarn: ["install"],
@@ -11,6 +12,22 @@ const INSTALL_ARGS: Record<Exclude<PackageManager, "none">, string[]> = {
 };
 
 export { InstallError };
+
+const FALLBACK_STATUS = "Installing packages…";
+
+/** Maps Yarn Berry install output to concise Listr status phases. */
+export function mapYarnInstallPhase(chunk: string): string | undefined {
+  if (/Resolution step|Resolving/i.test(chunk)) {
+    return "Resolving packages…";
+  }
+  if (/Fetch step|Fetching/i.test(chunk)) {
+    return "Fetching packages…";
+  }
+  if (/Link step|Linking/i.test(chunk)) {
+    return "Linking workspaces…";
+  }
+  return undefined;
+}
 
 function getBinary(pm: PackageManager): string {
   return pm;
@@ -47,37 +64,18 @@ export async function installPackages(
   }
 
   const args = INSTALL_ARGS[packageManager];
-  const execute = execaCommand(`${packageManager} ${args.join(" ")}`, {
-    cwd: targetDir,
-    reject: false,
-  });
-
-  let outputBuffer = "";
-  const chunkSize = 1024;
-
-  const pushOutput = (data: Buffer) => {
-    outputBuffer += data.toString();
-    if (outputBuffer.length > chunkSize) {
-      outputBuffer = outputBuffer.slice(-chunkSize);
-    }
-    const visibleOutput =
-      outputBuffer
-        .match(new RegExp(`.{1,${chunkSize}}`, "g"))
-        ?.slice(-1)
-        .map(chunk => chunk.trimEnd() + "\n")
-        .join("") ?? outputBuffer;
-    task.output = visibleOutput;
-    // Yarn-specific: show message during link step
-    if (packageManager === "yarn" && visibleOutput.includes("Link step")) {
-      task.output = chalk.yellow("starting link step, this might take a little time...");
-    }
-  };
-
-  execute.stdout?.on("data", pushOutput);
-  execute.stderr?.on("data", pushOutput);
+  const mapPhase = packageManager === "yarn" ? mapYarnInstallPhase : undefined;
 
   try {
-    const result = await execute;
+    const result = await runTaskCommand({
+      file: packageManager,
+      args,
+      cwd: targetDir,
+      initialStatus: FALLBACK_STATUS,
+      mapPhase,
+      task,
+    });
+
     if (result.exitCode !== 0) {
       const output = [result.stdout, result.stderr].filter(Boolean).join("\n").trim();
       throw new InstallError(

@@ -38,7 +38,7 @@ export async function createProject(options: Options) {
         },
       },
       {
-        title: `📦 Installing dependencies with ${options.packageManager}, this could take a while`,
+        title: `📦 Installing dependencies with ${options.packageManager}`,
         task: (_, task) => installPackages(targetDirectory, task, options.packageManager),
         skip: () => {
           if (options.packageManager === "none") {
@@ -49,19 +49,11 @@ export async function createProject(options: Options) {
           }
           return false;
         },
-        rendererOptions: {
-          outputBar: 8,
-          persistentOutput: false,
-        },
       },
       {
-        title: "📚 Installing Hedera Skills (agent marketplace)",
+        title: "📚 Installing Hedera Skills",
         task: (_, task) => installHederaSkillsMarketplace(targetDirectory, task),
         skip: () => (!options.installHederaSkills ? "Skipped — install Hedera Skills was not selected" : false),
-        rendererOptions: {
-          outputBar: 8,
-          persistentOutput: false,
-        },
       },
       {
         title: "🪄 Formatting files",

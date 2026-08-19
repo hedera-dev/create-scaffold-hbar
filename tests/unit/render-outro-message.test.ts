@@ -1,11 +1,21 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { expandOutroPlaceholders, renderOutroMessage } from "../../src/utils/render-outro-message";
+import {
+  expandOutroPlaceholders,
+  formatCommandSnippet,
+  renderOutroMessage,
+} from "../../src/utils/render-outro-message";
 import type { Options } from "../../src/types";
 import {
   HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS,
   HEDERA_SKILLS_MARKETPLACE_SPEC,
   SOLIDITY_FRAMEWORKS,
 } from "../../src/utils/consts";
+
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+function stripAnsi(text: string): string {
+  return text.replace(ANSI_PATTERN, "");
+}
 
 function baseOptions(overrides: Partial<Options> = {}): Options {
   return {
@@ -21,17 +31,23 @@ function baseOptions(overrides: Partial<Options> = {}): Options {
   };
 }
 
+describe("formatCommandSnippet", () => {
+  it("keeps the command text readable after ANSI stripping", () => {
+    expect(stripAnsi(formatCommandSnippet("yarn next:dev")).trim()).toBe("yarn next:dev");
+  });
+});
+
 describe("expandOutroPlaceholders", () => {
   const run = (s: string) => `yarn ${s}`;
 
-  it("replaces {run:script} tokens", () => {
-    expect(expandOutroPlaceholders("Run {run:next:start} now", run)).toBe("Run yarn next:start now");
+  it("replaces {run:script} tokens with command snippets", () => {
+    expect(stripAnsi(expandOutroPlaceholders("Run {run:next:start} now", run))).toContain("yarn next:start");
   });
 
   it("supports multiple placeholders", () => {
-    expect(expandOutroPlaceholders("{run:hardhat:chain} then {run:hardhat:deploy}", run)).toBe(
-      "yarn hardhat:chain then yarn hardhat:deploy",
-    );
+    const text = stripAnsi(expandOutroPlaceholders("{run:hardhat:chain} then {run:hardhat:deploy}", run));
+    expect(text).toContain("yarn hardhat:chain");
+    expect(text).toContain("yarn hardhat:deploy");
   });
 });
 
@@ -120,8 +136,16 @@ describe("renderOutroMessage", () => {
   it("shows npm install instructions when install is skipped", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     renderOutroMessage(baseOptions({ install: false, packageManager: "npm" }));
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).toContain("npm install --legacy-peer-deps && npm run format");
+    const text = stripAnsi(log.mock.calls.map(c => c.join("")).join("\n"));
+    expect(text).toContain("npm install --legacy-peer-deps");
+    expect(text).toContain("npm run format");
     expect(text).not.toContain("yarn install");
+  });
+
+  it("renders the cd step as a command snippet", () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    renderOutroMessage(baseOptions({ installHederaSkills: true }));
+    const text = stripAnsi(log.mock.calls.map(c => c.join("")).join("\n"));
+    expect(text).toContain("cd my-app");
   });
 });
