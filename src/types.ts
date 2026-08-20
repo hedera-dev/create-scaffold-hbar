@@ -51,11 +51,43 @@ const TemplateDefaultsSchema = z.object({
   packageManager: z.enum(["yarn", "npm", "none"]).optional(),
 });
 
+const TemplateOutroStepSchema = z
+  .object({
+    /** Bold step heading shown above command/url/text. */
+    label: z.string().min(1).optional(),
+    /**
+     * Shell command. May include `{run:script}` (expanded to the selected PM command)
+     * and `{run:framework:script}` (prefixes hardhat/foundry from the scaffold choice).
+     * Trailing args are allowed after the placeholder.
+     */
+    command: z.string().min(1).optional(),
+    /** Link shown in cyan (not as a command chip). */
+    url: z.string().min(1).optional(),
+    /** Plain prose / notes. Supports `{run:script}`, `{run:framework:script}`, and `{pm}` placeholders. */
+    text: z.string().min(1).optional(),
+  })
+  .refine(
+    step => step.label !== undefined || step.command !== undefined || step.url !== undefined || step.text !== undefined,
+    {
+      message: "Each outro step must include at least one of 'label', 'command', 'url', or 'text'.",
+    },
+  );
+
+const TemplateOutroSectionSchema = z.object({
+  /** Optional section heading (e.g. "Next steps"). */
+  title: z.string().min(1).optional(),
+  steps: z.array(TemplateOutroStepSchema).min(1),
+});
+
 const TemplateOutroSchema = z
   .object({
     /**
-     * Replaces the default contract/frontend-specific outro body (between the shared
-     * header and footer). One string per line. Leading `+` renders bold.
+     * Preferred structured outro body. When present, replaces the default
+     * contract/frontend middle section. Takes precedence over legacy `steps`.
+     */
+    sections: z.array(TemplateOutroSectionSchema).min(1).optional(),
+    /**
+     * Legacy flat lines. Prefer `sections`. Leading `+` renders bold.
      * Use `{run:script}` for the selected package manager command.
      */
     steps: z.array(z.string().min(1)).min(1).optional(),
@@ -65,9 +97,14 @@ const TemplateOutroSchema = z
      */
     installCommand: z.string().min(1).optional(),
   })
-  .refine(outro => outro.steps !== undefined || outro.installCommand !== undefined, {
-    message: "Template outro must define at least one of 'steps' or 'installCommand'.",
+  .refine(outro => outro.sections !== undefined || outro.steps !== undefined || outro.installCommand !== undefined, {
+    message: "Template outro must define at least one of 'sections', 'steps', or 'installCommand'.",
   });
+
+/** Structured outro step from `template.json` (after Zod parse). */
+export type TemplateOutroStep = z.infer<typeof TemplateOutroStepSchema>;
+/** Structured outro section from `template.json` (after Zod parse). */
+export type TemplateOutroSection = z.infer<typeof TemplateOutroSectionSchema>;
 
 const TemplateManifestBlockSchema = z.object({
   /**
@@ -94,7 +131,7 @@ const TemplateManifestBlockSchema = z.object({
   capabilities: TemplateCapabilitiesSchema.optional(),
   /** Template-specific default values used when multiple options exist. */
   defaults: TemplateDefaultsSchema.optional(),
-  /** Optional custom outro body; see `outro.steps`. */
+  /** Optional custom outro body; prefer `outro.sections` (legacy `outro.steps` still accepted). */
   outro: TemplateOutroSchema.optional(),
 });
 
@@ -175,10 +212,11 @@ export type Options = {
   network: Network;
   installHederaSkills: boolean;
   /**
-   * From template manifest `outro.steps` after scaffold. When set, replaces the
-   * default dynamic outro section.
+   * Structured outro body from the template manifest (native `outro.sections`
+   * or adapted from legacy `outro.steps`). When set, replaces the default
+   * contract/frontend middle section.
    */
-  outroSteps?: string[];
+  outroSections?: TemplateOutroSection[];
   /**
    * Optional install command override from template manifest `outro.installCommand`.
    * Used to keep shared outro text in sync with templates that prefer pnpm.

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveTemplateCapabilities } from "../../src/utils/template-capabilities";
+import { TEMPLATE_REGISTRY } from "../../src/utils/template-registry";
 
 describe("resolveTemplateCapabilities", () => {
   afterEach(() => {
@@ -52,5 +53,26 @@ describe("resolveTemplateCapabilities", () => {
 
     expect(caps.frontend).toContain("nextjs-app");
     expect(caps.solidityFramework.length).toBeGreaterThan(0);
+  });
+
+  it("uses the built-in registry for known starters without calling GitHub", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const caps = await resolveTemplateCapabilities("bridge");
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(caps.solidityFramework).toEqual(["foundry"]);
+    expect(caps.frontend).toEqual(["nextjs-app"]);
+  });
+
+  it("covers every registry template with explicit capabilities", async () => {
+    for (const entry of TEMPLATE_REGISTRY) {
+      const caps = await resolveTemplateCapabilities(entry.value);
+      expect(caps.frontend.length).toBeGreaterThan(0);
+      expect(caps.solidityFramework.length).toBeGreaterThan(0);
+      expect(caps.packageManager.length).toBeGreaterThan(0);
+      expect(caps).toEqual(entry.capabilities);
+    }
   });
 });

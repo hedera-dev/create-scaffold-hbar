@@ -12,68 +12,16 @@ export const SOLIDITY_FRAMEWORKS = {
   FOUNDRY: "foundry",
 } as const;
 
-/** Starter template options shown in the interactive select prompt (used when dynamic fetch fails). */
-export const TEMPLATES = [
-  { value: "blank", label: "Blank Starter", hint: "minimal setup, no example contracts" },
-] as const;
-
-/** Fallback when fetching template branches fails (e.g. offline). Same shape as TEMPLATES. */
-export const TEMPLATES_FALLBACK = TEMPLATES;
-
-/**
- * Display-name overrides for the template select prompt, keyed by template value
- * (the branch suffix after "templates/"). When a value is present here, this label
- * is shown instead of the auto-derived title-cased branch name.
- */
-export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
-  "hedera-demo": "Hedera Native",
-  "payments-scheduler": "Onchain Cron Job",
-  "tokenise-subscriptions": "Tokenize Subscriptions",
-  "x402-pay-per-use": "x402 Pay-Per-Use",
-};
-
-/**
- * Local fallback capabilities for well-known templates.
- * Used when template manifest metadata can't be fetched.
- */
-export const TEMPLATE_CAPABILITIES_FALLBACK: Record<
-  string,
-  {
-    frontend?: Array<"nextjs-app" | "none">;
-    solidityFramework?: Array<"foundry" | "hardhat" | "none">;
-    packageManager?: Array<"yarn" | "npm" | "none">;
-    defaults?: {
-      frontend?: "nextjs-app" | "none";
-      solidityFramework?: "foundry" | "hardhat" | "none";
-      packageManager?: "yarn" | "npm" | "none";
-    };
-  }
-> = {
-  blank: {
-    frontend: ["nextjs-app"],
-    solidityFramework: ["foundry", "hardhat"],
-    packageManager: ["yarn", "npm"],
-    defaults: { frontend: "nextjs-app", solidityFramework: "foundry" },
-  },
-  "payments-scheduler": {
-    frontend: ["nextjs-app"],
-    solidityFramework: ["foundry"],
-    packageManager: ["yarn", "npm"],
-    defaults: { frontend: "nextjs-app", solidityFramework: "foundry" },
-  },
-  "hedera-demo": {
-    frontend: ["nextjs-app"],
-    solidityFramework: ["none"],
-    packageManager: ["yarn"],
-    defaults: { frontend: "nextjs-app", solidityFramework: "none", packageManager: "yarn" },
-  },
-  "x402-pay-per-use": {
-    frontend: ["nextjs-app"],
-    solidityFramework: ["hardhat"],
-    packageManager: ["yarn", "npm"],
-    defaults: { frontend: "nextjs-app", solidityFramework: "hardhat", packageManager: "yarn" },
-  },
-};
+export {
+  TEMPLATES,
+  TEMPLATES_FALLBACK,
+  TEMPLATE_LABEL_OVERRIDES,
+  TEMPLATE_CAPABILITIES_FALLBACK,
+  TEMPLATE_REGISTRY,
+  getRegistryCapabilities,
+  getRegistryEntry,
+} from "./template-registry";
+export type { TemplateRegistryCapabilities, TemplateRegistryEntry } from "./template-registry";
 
 /** Frontend framework options. */
 export const FRONTENDS = [

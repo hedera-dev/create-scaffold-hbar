@@ -79,6 +79,43 @@ describe("TemplateManifestSchema", () => {
       expect(result.data["create-scaffold-hbar"]?.outro?.steps).toEqual(["+Start the frontend: {run:next:start}"]);
     });
 
+    it("accepts outro.sections for a structured CLI outro body", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "bridge",
+        "create-scaffold-hbar": {
+          outro: {
+            sections: [
+              {
+                title: "Next steps",
+                steps: [
+                  { label: "Compile", command: "{run:foundry:compile}" },
+                  { label: "Faucet", url: "https://portal.hedera.com/faucet" },
+                  { text: "Customize the providers." },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data["create-scaffold-hbar"]?.outro?.sections?.[0].title).toBe("Next steps");
+      expect(result.data["create-scaffold-hbar"]?.outro?.sections?.[0].steps).toHaveLength(3);
+    });
+
+    it("accepts outro with both sections and legacy steps (sections preferred at runtime)", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "bridge",
+        "create-scaffold-hbar": {
+          outro: {
+            sections: [{ steps: [{ command: "yarn next:dev" }] }],
+            steps: ["+legacy"],
+          },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
     it("accepts outro.installCommand without steps (install hint only)", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "pnpm-template",
@@ -90,6 +127,16 @@ describe("TemplateManifestSchema", () => {
       if (!result.success) return;
       expect(result.data["create-scaffold-hbar"]?.outro?.steps).toBeUndefined();
       expect(result.data["create-scaffold-hbar"]?.outro?.installCommand).toBe("pnpm install");
+    });
+
+    it("rejects an outro step with no payload fields", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "test",
+        "create-scaffold-hbar": {
+          outro: { sections: [{ steps: [{}] }] },
+        },
+      });
+      expect(result.success).toBe(false);
     });
 
     it("preserves rename entry structure on parse", () => {
@@ -157,7 +204,7 @@ describe("TemplateManifestSchema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("rejects an outro block with neither steps nor installCommand", () => {
+    it("rejects an outro block with neither sections, steps, nor installCommand", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
         "create-scaffold-hbar": {

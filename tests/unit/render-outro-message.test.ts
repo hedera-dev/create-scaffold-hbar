@@ -1,11 +1,23 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { expandOutroPlaceholders, renderOutroMessage } from "../../src/utils/render-outro-message";
+import { formatCommandSnippet, formatOutroMessage, renderOutroMessage } from "../../src/utils/render-outro-message";
 import type { Options } from "../../src/types";
 import {
   HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS,
   HEDERA_SKILLS_MARKETPLACE_SPEC,
   SOLIDITY_FRAMEWORKS,
 } from "../../src/utils/consts";
+
+const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+function stripAnsi(text: string): string {
+  return text.replace(ANSI_PATTERN, "");
+}
+
+vi.mock("@clack/prompts", () => ({
+  outro: vi.fn(),
+}));
+
+const { outro } = await import("@clack/prompts");
 
 function baseOptions(overrides: Partial<Options> = {}): Options {
   return {
@@ -21,107 +33,169 @@ function baseOptions(overrides: Partial<Options> = {}): Options {
   };
 }
 
-describe("expandOutroPlaceholders", () => {
-  const run = (s: string) => `yarn ${s}`;
+describe("formatCommandSnippet", () => {
+  it("keeps the command text readable after ANSI stripping", () => {
+    expect(stripAnsi(formatCommandSnippet("yarn next:dev")).trim()).toBe("yarn next:dev");
+  });
+});
 
-  it("replaces {run:script} tokens", () => {
-    expect(expandOutroPlaceholders("Run {run:next:start} now", run)).toBe("Run yarn next:start now");
+describe("formatOutroMessage", () => {
+  it("uses default Foundry sections when outroSections is absent", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions()));
+    expect(text).toContain("Run locally");
+    expect(text).toContain("Deploy to Hedera testnet");
+    expect(text).toContain("Optional: Hedera agent skills");
+    expect(text).toContain(
+      `npx skills add ${HEDERA_SKILLS_MARKETPLACE_SPEC} ${HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS.join(" ")}`,
+    );
+    expect(text).toContain("yarn foundry:chain");
   });
 
-  it("supports multiple placeholders", () => {
-    expect(expandOutroPlaceholders("{run:hardhat:chain} then {run:hardhat:deploy}", run)).toBe(
-      "yarn hardhat:chain then yarn hardhat:deploy",
+  it("omits Hedera Skills tip when marketplace was installed during scaffold", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions({ installHederaSkills: true })));
+    expect(text).not.toContain("Optional: Hedera agent skills");
+  });
+
+  it("renders structured template sections with spacing", () => {
+    const text = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: null,
+          installHederaSkills: true,
+          outroSections: [
+            {
+              title: "Get started",
+              steps: [
+                { label: "Start the frontend", command: "{run:next:start}" },
+                { label: "Open the faucet", url: "https://portal.hedera.com/faucet" },
+              ],
+            },
+          ],
+        }),
+      ),
     );
+    expect(text).not.toContain("Run locally");
+    expect(text).toContain("Get started");
+    expect(text).toContain("Start the frontend");
+    expect(text).toContain("yarn next:start");
+    expect(text).toContain("https://portal.hedera.com/faucet");
+    // Blank line between steps for readability
+    expect(text).toMatch(/Start the frontend\n\s+yarn next:start\s*\n\n\s*Open the faucet/);
+  });
+
+  it("expands {run:harness:run} for yarn and npm", () => {
+    const yarnText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: null,
+          installHederaSkills: true,
+          packageManager: "yarn",
+          outroSections: [{ steps: [{ label: "Run harness", command: "{run:harness:run}" }] }],
+        }),
+      ),
+    );
+    expect(yarnText).toContain("yarn harness:run");
+
+    const npmText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: null,
+          installHederaSkills: true,
+          packageManager: "npm",
+          outroSections: [{ steps: [{ label: "Run harness", command: "{run:harness:run}" }] }],
+        }),
+      ),
+    );
+    expect(npmText).toContain("npm run harness:run");
+    expect(npmText).not.toContain("yarn harness:run");
+  });
+
+  it("uses npm commands when npm package manager is selected", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions({ packageManager: "npm" })));
+    expect(text).toContain("npm run foundry:chain");
+    expect(text).toContain("npm run foundry:deploy -- --network");
+    expect(text).not.toContain("yarn foundry:chain");
+  });
+
+  it("uses pnpm with run -- when packageManager is none and deploy appends flags", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions({ packageManager: "none" })));
+    expect(text).toContain("pnpm foundry:chain");
+    expect(text).toContain("pnpm run foundry:deploy -- --network");
+    expect(text).not.toContain("yarn foundry:chain");
+  });
+
+  it("shows install command chips when install is skipped", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions({ install: false, packageManager: "npm" })));
+    expect(text).toContain("npm install --legacy-peer-deps");
+    expect(text).toContain("npm run format");
+    expect(text).not.toContain("yarn install");
+  });
+
+  it("renders the cd step as a command snippet", () => {
+    const text = stripAnsi(formatOutroMessage(baseOptions({ installHederaSkills: true })));
+    expect(text).toContain("cd my-app");
+  });
+
+  it("expands {pm} in structured text", () => {
+    const text = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: null,
+          installHederaSkills: true,
+          packageManager: "npm",
+          outroSections: [{ steps: [{ text: "Then run {pm} run lint" }] }],
+        }),
+      ),
+    );
+    expect(text).toContain("Then run npm run lint");
+  });
+
+  it("expands {run:framework:script} from the scaffold Solidity choice", () => {
+    const foundryText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: SOLIDITY_FRAMEWORKS.FOUNDRY,
+          installHederaSkills: true,
+          outroSections: [
+            {
+              steps: [{ label: "Deploy", command: "{run:framework:deploy} --network localhost" }],
+            },
+          ],
+        }),
+      ),
+    );
+    expect(foundryText).toContain("yarn foundry:deploy --network localhost");
+    expect(foundryText).not.toContain("{run:framework:");
+
+    const hardhatText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: SOLIDITY_FRAMEWORKS.HARDHAT,
+          installHederaSkills: true,
+          packageManager: "npm",
+          outroSections: [
+            {
+              steps: [{ command: "{run:framework:account:generate}" }],
+            },
+          ],
+        }),
+      ),
+    );
+    expect(hardhatText).toContain("npm run hardhat:account:generate");
   });
 });
 
 describe("renderOutroMessage", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(outro).mockClear();
   });
 
-  it("uses default Foundry outro when outroSteps is absent", () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(baseOptions());
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).toContain("Run locally:");
-    expect(text).toContain("Deploy to Hedera testnet:");
-    expect(text).toContain("Optional: Hedera agent skills");
-    expect(text).toContain(
-      `npx skills add ${HEDERA_SKILLS_MARKETPLACE_SPEC} ${HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS.join(" ")}`,
-    );
-  });
-
-  it("omits Hedera Skills tip when marketplace was installed during scaffold", () => {
+  it("prints the body and calls clack outro for the footer", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     renderOutroMessage(baseOptions({ installHederaSkills: true }));
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).not.toContain("Optional: Hedera agent skills");
-  });
-
-  it("renders template outro steps instead of default body", () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(
-      baseOptions({
-        outroSteps: ["+Start the frontend: {run:next:start}"],
-        solidityFramework: null,
-      }),
-    );
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).not.toContain("Run locally:");
-    expect(text).toContain("yarn next:start");
+    const text = stripAnsi(log.mock.calls.map(c => c.join("")).join("\n"));
     expect(text).toContain("Congratulations!");
-    expect(text).toContain("Thanks for using Scaffold-HBAR");
-  });
-
-  it("expands {run:harness:run} for yarn and npm outro steps", () => {
-    const yarnLog = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(
-      baseOptions({
-        outroSteps: ["+Run the harness recipe: {run:harness:run}"],
-        solidityFramework: null,
-        packageManager: "yarn",
-      }),
-    );
-    expect(yarnLog.mock.calls.map(c => c.join("")).join("\n")).toContain("yarn harness:run");
-    yarnLog.mockRestore();
-
-    const npmLog = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(
-      baseOptions({
-        outroSteps: ["+Run the harness recipe: {run:harness:run}"],
-        solidityFramework: null,
-        packageManager: "npm",
-      }),
-    );
-    const npmText = npmLog.mock.calls.map(c => c.join("")).join("\n");
-    expect(npmText).toContain("npm run harness:run");
-    expect(npmText).not.toContain("yarn harness:run");
-  });
-
-  it("uses npm commands when npm package manager is selected", () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(baseOptions({ packageManager: "npm" }));
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).toContain("npm run foundry:chain");
-    expect(text).toContain("npm run foundry:deploy -- --network"); // Should have -- separator for args
-    expect(text).not.toContain("yarn foundry:chain");
-  });
-
-  it("uses pnpm with run -- when packageManager is none and deploy appends flags", () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(baseOptions({ packageManager: "none" }));
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).toContain("pnpm foundry:chain");
-    expect(text).toContain("pnpm run foundry:deploy -- --network");
-    expect(text).not.toContain("yarn foundry:chain");
-  });
-
-  it("shows npm install instructions when install is skipped", () => {
-    const log = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderOutroMessage(baseOptions({ install: false, packageManager: "npm" }));
-    const text = log.mock.calls.map(c => c.join("")).join("\n");
-    expect(text).toContain("npm install --legacy-peer-deps && npm run format");
-    expect(text).not.toContain("yarn install");
+    expect(outro).toHaveBeenCalled();
   });
 });
