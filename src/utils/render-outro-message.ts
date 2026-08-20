@@ -18,7 +18,7 @@ export function formatCommandSnippet(command: string): string {
 }
 
 function formatSectionTitle(title: string): string {
-  return chalk.hex(BRAND_COLORS.hederaTeal).bold(title);
+  return chalk.hex(BRAND_COLORS.successGreen).bold(title);
 }
 
 function formatStepLabel(label: string): string {
