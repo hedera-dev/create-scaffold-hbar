@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import chalk from "chalk";
 import { formatCommandSnippet, formatOutroMessage, renderOutroMessage } from "../../src/utils/render-outro-message";
 import type { Options } from "../../src/types";
 import {
@@ -36,6 +37,18 @@ function baseOptions(overrides: Partial<Options> = {}): Options {
 describe("formatCommandSnippet", () => {
   it("keeps the command text readable after ANSI stripping", () => {
     expect(stripAnsi(formatCommandSnippet("yarn next:dev")).trim()).toBe("yarn next:dev");
+  });
+
+  it("uses a colored chip when chalk colors are enabled", () => {
+    const previousLevel = chalk.level;
+    chalk.level = 3;
+    try {
+      const chip = formatCommandSnippet("yarn next:dev");
+      expect(chip).toContain(String.fromCharCode(27) + "[");
+      expect(stripAnsi(chip).trim()).toBe("yarn next:dev");
+    } finally {
+      chalk.level = previousLevel;
+    }
   });
 });
 

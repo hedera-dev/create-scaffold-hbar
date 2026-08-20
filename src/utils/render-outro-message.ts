@@ -11,10 +11,22 @@ import { expandOutroTokens } from "./outro-model";
 
 /**
  * Formats a shell command as a terminal "code chip" so it stands out from prose.
- * Uses a dark background + light text with padding (ANSI stripped when colors are off).
+ * Purple background + white text (readable on typical dark terminals).
  */
 export function formatCommandSnippet(command: string): string {
-  return chalk.bgHex(BRAND_COLORS.hederaDark).hex(BRAND_COLORS.textPrimary).bold(` ${command} `);
+  return chalk.bgHex(BRAND_COLORS.hederaPurple).hex(BRAND_COLORS.textPrimary).bold(` ${command} `);
+}
+
+function formatSectionTitle(title: string): string {
+  return chalk.hex(BRAND_COLORS.hederaTeal).bold(title);
+}
+
+function formatStepLabel(label: string): string {
+  return chalk.hex(BRAND_COLORS.textPrimary).bold(label);
+}
+
+function formatStepText(text: string): string {
+  return chalk.hex(BRAND_COLORS.textMuted)(text);
 }
 
 /** Generates the run command based on package manager.
@@ -154,7 +166,7 @@ function formatStep(
 ): string[] {
   const lines: string[] = [];
   if (step.label) {
-    lines.push(chalk.bold(expandOutroTokens(step.label, run, options.packageManager, options.solidityFramework)));
+    lines.push(formatStepLabel(expandOutroTokens(step.label, run, options.packageManager, options.solidityFramework)));
   }
   if (step.command) {
     const command = expandOutroTokens(step.command, run, options.packageManager, options.solidityFramework);
@@ -162,13 +174,13 @@ function formatStep(
   }
   if (step.url) {
     const url = expandOutroTokens(step.url, run, options.packageManager, options.solidityFramework);
-    lines.push(`  ${chalk.cyan(url)}`);
+    lines.push(`  ${chalk.cyan.underline(url)}`);
   }
   if (step.text) {
     const text = expandOutroTokens(step.text, run, options.packageManager, options.solidityFramework);
     const wrapped = wrapText(text, width - 2);
     for (const wrappedLine of wrapped.split("\n")) {
-      lines.push(`  ${wrappedLine}`);
+      lines.push(`  ${formatStepText(wrappedLine)}`);
     }
   }
   return lines;
@@ -182,24 +194,24 @@ export function formatOutroMessage(options: Options): string {
   const width = terminalWidth();
   const blocks: string[] = [];
 
-  blocks.push(`${chalk.bold.green("Congratulations!")} Your project has been scaffolded! 🎉`);
+  blocks.push(`${chalk.hex(BRAND_COLORS.successGreen).bold("Congratulations!")} Your project has been scaffolded! 🎉`);
   blocks.push("");
-  blocks.push(chalk.bold("Next steps"));
+  blocks.push(formatSectionTitle("Next steps"));
   blocks.push(`  ${formatCommandSnippet(`cd ${options.project}`)}`);
 
   if (options.solidityFramework === SOLIDITY_FRAMEWORKS.FOUNDRY) {
     blocks.push("");
     blocks.push(
-      `${chalk.yellow("Note:")} Foundry (forge, cast, anvil) must be installed. See ${chalk.cyan("https://book.getfoundry.sh")}`,
+      `${chalk.hex(BRAND_COLORS.warningAmber).bold("Note:")} Foundry (forge, cast, anvil) must be installed. See ${chalk.cyan.underline("https://book.getfoundry.sh")}`,
     );
   }
 
   if (!options.install) {
     blocks.push("");
-    blocks.push(chalk.bold("Install dependencies & format files"));
+    blocks.push(formatSectionTitle("Install dependencies & format files"));
     const installCommands = getInstallAndFormatCommands(options.packageManager, options.outroInstallCommand);
     if (installCommands.length === 0) {
-      blocks.push(`  ${chalk.cyan("See template README for install command")}`);
+      blocks.push(`  ${formatStepText("See template README for install command")}`);
     } else {
       for (const command of installCommands) {
         blocks.push(`  ${formatCommandSnippet(command)}`);
@@ -209,8 +221,8 @@ export function formatOutroMessage(options: Options): string {
 
   if (!options.installHederaSkills) {
     blocks.push("");
-    blocks.push(chalk.bold("Optional: Hedera agent skills"));
-    blocks.push(`  ${chalk.dim("Add the official marketplace for Cursor / Claude Code (non-interactive):")}`);
+    blocks.push(formatSectionTitle("Optional: Hedera agent skills"));
+    blocks.push(`  ${formatStepText("Add the official marketplace for Cursor / Claude Code (non-interactive):")}`);
     blocks.push(
       `  ${formatCommandSnippet(`npx skills add ${HEDERA_SKILLS_MARKETPLACE_SPEC} ${HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS.join(" ")}`)}`,
     );
@@ -221,7 +233,7 @@ export function formatOutroMessage(options: Options): string {
   for (const section of sections) {
     blocks.push("");
     if (section.title) {
-      blocks.push(chalk.bold(section.title));
+      blocks.push(formatSectionTitle(section.title));
     }
     for (let i = 0; i < section.steps.length; i++) {
       const stepLines = formatStep(section.steps[i], options, run, width);
@@ -238,5 +250,5 @@ export function formatOutroMessage(options: Options): string {
 export function renderOutroMessage(options: Options) {
   const body = formatOutroMessage(options);
   console.log(`\n${body}\n`);
-  p.outro(chalk.bold.green("Thanks for using Scaffold-HBAR — happy building!"));
+  p.outro(chalk.hex(BRAND_COLORS.successGreen).bold("Thanks for using Scaffold-HBAR — happy building!"));
 }
