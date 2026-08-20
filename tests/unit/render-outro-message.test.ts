@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import chalk from "chalk";
 import { formatCommandSnippet, formatOutroMessage, renderOutroMessage } from "../../src/utils/render-outro-message";
 import type { Options } from "../../src/types";
 import {
@@ -37,6 +38,18 @@ describe("formatCommandSnippet", () => {
   it("keeps the command text readable after ANSI stripping", () => {
     expect(stripAnsi(formatCommandSnippet("yarn next:dev")).trim()).toBe("yarn next:dev");
   });
+
+  it("uses a colored chip when chalk colors are enabled", () => {
+    const previousLevel = chalk.level;
+    chalk.level = 3;
+    try {
+      const chip = formatCommandSnippet("yarn next:dev");
+      expect(chip).toContain(String.fromCharCode(27) + "[");
+      expect(stripAnsi(chip).trim()).toBe("yarn next:dev");
+    } finally {
+      chalk.level = previousLevel;
+    }
+  });
 });
 
 describe("formatOutroMessage", () => {
@@ -49,6 +62,8 @@ describe("formatOutroMessage", () => {
       `npx skills add ${HEDERA_SKILLS_MARKETPLACE_SPEC} ${HEDERA_SKILLS_ADD_NONINTERACTIVE_ARGS.join(" ")}`,
     );
     expect(text).toContain("yarn foundry:chain");
+    expect(text).toContain("yarn next:dev");
+    expect(text).not.toContain("yarn next:start");
   });
 
   it("omits Hedera Skills tip when marketplace was installed during scaffold", () => {
@@ -66,7 +81,7 @@ describe("formatOutroMessage", () => {
             {
               title: "Get started",
               steps: [
-                { label: "Start the frontend", command: "{run:next:start}" },
+                { label: "Start the frontend", command: "{run:next:dev}" },
                 { label: "Open the faucet", url: "https://portal.hedera.com/faucet" },
               ],
             },
@@ -77,10 +92,10 @@ describe("formatOutroMessage", () => {
     expect(text).not.toContain("Run locally");
     expect(text).toContain("Get started");
     expect(text).toContain("Start the frontend");
-    expect(text).toContain("yarn next:start");
+    expect(text).toContain("yarn next:dev");
     expect(text).toContain("https://portal.hedera.com/faucet");
     // Blank line between steps for readability
-    expect(text).toMatch(/Start the frontend\n\s+yarn next:start\s*\n\n\s*Open the faucet/);
+    expect(text).toMatch(/Start the frontend\n\s+yarn next:dev\s*\n\n\s*Open the faucet/);
   });
 
   it("expands {run:harness:run} for yarn and npm", () => {

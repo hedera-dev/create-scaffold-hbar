@@ -67,7 +67,7 @@ export async function createProject(options: Options) {
       },
       {
         title: `📡 Initializing Git repository${options.solidityFramework === SOLIDITY_FRAMEWORKS.FOUNDRY ? " and submodules" : ""}`,
-        task: () => createFirstGitCommit(targetDirectory, options),
+        task: (_, task) => createFirstGitCommit(targetDirectory, options, task),
       },
     ],
     { rendererOptions: { collapseSkips: false, suffixSkips: true } },

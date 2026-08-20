@@ -87,8 +87,9 @@ const TemplateOutroSchema = z
      */
     sections: z.array(TemplateOutroSectionSchema).min(1).optional(),
     /**
-     * Legacy flat lines. Prefer `sections`. Leading `+` renders bold.
-     * Use `{run:script}` for the selected package manager command.
+     * @deprecated Prefer `sections`. Flat lines are still accepted and adapted at
+     * runtime for older templates. Leading `+` becomes a step label; use
+     * `{run:script}` for the selected package manager command.
      */
     steps: z.array(z.string().min(1)).min(1).optional(),
     /**
@@ -131,7 +132,7 @@ const TemplateManifestBlockSchema = z.object({
   capabilities: TemplateCapabilitiesSchema.optional(),
   /** Template-specific default values used when multiple options exist. */
   defaults: TemplateDefaultsSchema.optional(),
-  /** Optional custom outro body; prefer `outro.sections` (legacy `outro.steps` still accepted). */
+  /** Optional custom outro body; use `outro.sections` (`outro.steps` is deprecated). */
   outro: TemplateOutroSchema.optional(),
 });
 
