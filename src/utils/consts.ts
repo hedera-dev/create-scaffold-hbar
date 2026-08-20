@@ -57,6 +57,9 @@ export const PACKAGE_MANAGERS = [
 export const BRAND_COLORS = {
   hederaTeal: "#0031FF",
   hederaPurple: "#8259EF",
+  /** Muted purple for command chips — readable on dark terminals without neon punch. */
+  commandChipBg: "#3F3658",
+  commandChipText: "#E4D9FF",
   hederaDark: "#11151D",
   textPrimary: "#FFFFFF",
   textMuted: "#9B9B9D",

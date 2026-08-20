@@ -11,10 +11,10 @@ import { expandOutroTokens } from "./outro-model";
 
 /**
  * Formats a shell command as a terminal "code chip" so it stands out from prose.
- * Purple background + white text (readable on typical dark terminals).
+ * Soft purple background + pale lavender text (readable without neon punch).
  */
 export function formatCommandSnippet(command: string): string {
-  return chalk.bgHex(BRAND_COLORS.hederaPurple).hex(BRAND_COLORS.textPrimary).bold(` ${command} `);
+  return chalk.bgHex(BRAND_COLORS.commandChipBg).hex(BRAND_COLORS.commandChipText).bold(` ${command} `);
 }
 
 function formatSectionTitle(title: string): string {
