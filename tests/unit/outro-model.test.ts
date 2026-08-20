@@ -82,4 +82,19 @@ describe("expandOutroTokens", () => {
     expect(expandOutroTokens("Use {pm} then {run:next:dev}", run, "yarn")).toBe("Use yarn then yarn next:dev");
     expect(expandOutroTokens("{pm} install", run, "none")).toBe("pnpm install");
   });
+
+  it("expands {run:framework:script} with the selected Solidity framework", () => {
+    const runYarn = (script: string) => `yarn ${script}`;
+    const runNpm = (script: string) => `npm run ${script}`;
+    expect(expandOutroTokens("{run:framework:deploy} --network localhost", runYarn, "yarn", "foundry")).toBe(
+      "yarn foundry:deploy --network localhost",
+    );
+    expect(expandOutroTokens("{run:framework:account:generate}", runNpm, "npm", "hardhat")).toBe(
+      "npm run hardhat:account:generate",
+    );
+  });
+
+  it("leaves {run:framework:script} unchanged when no framework is selected", () => {
+    expect(expandOutroTokens("{run:framework:deploy}", run, "yarn", null)).toBe("{run:framework:deploy}");
+  });
 });

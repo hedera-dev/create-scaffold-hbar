@@ -57,12 +57,13 @@ const TemplateOutroStepSchema = z
     label: z.string().min(1).optional(),
     /**
      * Shell command. May include `{run:script}` (expanded to the selected PM command)
-     * and trailing args. Rendered as a highlighted code chip.
+     * and `{run:framework:script}` (prefixes hardhat/foundry from the scaffold choice).
+     * Trailing args are allowed after the placeholder.
      */
     command: z.string().min(1).optional(),
     /** Link shown in cyan (not as a command chip). */
     url: z.string().min(1).optional(),
-    /** Plain prose / notes. Supports `{run:script}` and `{pm}` placeholders. */
+    /** Plain prose / notes. Supports `{run:script}`, `{run:framework:script}`, and `{pm}` placeholders. */
     text: z.string().min(1).optional(),
   })
   .refine(

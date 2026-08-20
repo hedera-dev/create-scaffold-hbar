@@ -149,6 +149,40 @@ describe("formatOutroMessage", () => {
     );
     expect(text).toContain("Then run npm run lint");
   });
+
+  it("expands {run:framework:script} from the scaffold Solidity choice", () => {
+    const foundryText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: SOLIDITY_FRAMEWORKS.FOUNDRY,
+          installHederaSkills: true,
+          outroSections: [
+            {
+              steps: [{ label: "Deploy", command: "{run:framework:deploy} --network localhost" }],
+            },
+          ],
+        }),
+      ),
+    );
+    expect(foundryText).toContain("yarn foundry:deploy --network localhost");
+    expect(foundryText).not.toContain("{run:framework:");
+
+    const hardhatText = stripAnsi(
+      formatOutroMessage(
+        baseOptions({
+          solidityFramework: SOLIDITY_FRAMEWORKS.HARDHAT,
+          installHederaSkills: true,
+          packageManager: "npm",
+          outroSections: [
+            {
+              steps: [{ command: "{run:framework:account:generate}" }],
+            },
+          ],
+        }),
+      ),
+    );
+    expect(hardhatText).toContain("npm run hardhat:account:generate");
+  });
 });
 
 describe("renderOutroMessage", () => {

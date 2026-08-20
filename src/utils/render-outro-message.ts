@@ -161,18 +161,18 @@ function formatStep(
 ): string[] {
   const lines: string[] = [];
   if (step.label) {
-    lines.push(chalk.bold(expandOutroTokens(step.label, run, options.packageManager)));
+    lines.push(chalk.bold(expandOutroTokens(step.label, run, options.packageManager, options.solidityFramework)));
   }
   if (step.command) {
-    const command = expandOutroTokens(step.command, run, options.packageManager);
+    const command = expandOutroTokens(step.command, run, options.packageManager, options.solidityFramework);
     lines.push(`  ${formatCommandSnippet(command)}`);
   }
   if (step.url) {
-    const url = expandOutroTokens(step.url, run, options.packageManager);
+    const url = expandOutroTokens(step.url, run, options.packageManager, options.solidityFramework);
     lines.push(`  ${chalk.cyan(url)}`);
   }
   if (step.text) {
-    const text = expandOutroTokens(step.text, run, options.packageManager);
+    const text = expandOutroTokens(step.text, run, options.packageManager, options.solidityFramework);
     const wrapped = wrapText(text, width - 2);
     for (const wrappedLine of wrapped.split("\n")) {
       lines.push(`  ${wrappedLine}`);

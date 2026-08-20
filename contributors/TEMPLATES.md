@@ -36,7 +36,7 @@ Optional `create-scaffold-hbar.outro` replaces the default contract/frontend mid
           "steps": [
             {
               "label": "Generate a deployer account",
-              "command": "{run:foundry:account:generate}"
+              "command": "{run:framework:account:generate}"
             },
             {
               "label": "Fund with testnet HBAR",
@@ -59,14 +59,14 @@ Optional `create-scaffold-hbar.outro` replaces the default contract/frontend mid
 
 Each step may include any of:
 
-| Field     | Purpose                                                           |
-| --------- | ----------------------------------------------------------------- |
-| `label`   | Bold heading above the payload                                    |
-| `command` | Highlighted shell chip; supports `{run:script}` and trailing args |
-| `url`     | Cyan link (not a chip)                                            |
-| `text`    | Plain prose; supports `{run:script}` and `{pm}`                   |
+| Field     | Purpose                                                                                      |
+| --------- | -------------------------------------------------------------------------------------------- |
+| `label`   | Bold heading above the payload                                                               |
+| `command` | Highlighted shell chip; supports `{run:script}`, `{run:framework:script}`, and trailing args |
+| `url`     | Cyan link (not a chip)                                                                       |
+| `text`    | Plain prose; supports `{run:script}`, `{run:framework:script}`, and `{pm}`                   |
 
-`{run:script}` expands to the selected package manager command (`yarn script`, `npm run script`, or `pnpm script`). `{pm}` expands to `yarn`, `npm`, or `pnpm` (when package manager is `none`).
+`{run:script}` expands to the selected package manager command (`yarn script`, `npm run script`, or `pnpm script`). `{run:framework:script}` inserts the chosen Solidity framework (`hardhat` or `foundry`) before the script (e.g. `{run:framework:deploy}` → `yarn foundry:deploy`). `{pm}` expands to `yarn`, `npm`, or `pnpm` (when package manager is `none`).
 
 Optional `outro.installCommand` overrides the shared skip-install hint (e.g. `"pnpm install"`).
 

@@ -128,7 +128,26 @@ export function resolveOutroSections(outro: {
 
 /** Expands `{run:script}` to a package-manager command string (no styling). */
 export function expandRunPlaceholders(line: string, run: (script: string) => string): string {
-  return line.replace(/\{run:([a-zA-Z0-9:_-]+)\}/g, (_, script: string) => run(script));
+  return line.replace(/\{run:([a-zA-Z0-9:_-]+)\}/g, (match, script: string) => {
+    // Leave `{run:framework:…}` for expandFrameworkPlaceholders (or untouched if unset).
+    if (script.startsWith("framework:")) return match;
+    return run(script);
+  });
+}
+
+/**
+ * Rewrites `{run:framework:script}` using the selected Solidity framework
+ * (e.g. `{run:framework:deploy}` → `{run:foundry:deploy}`).
+ * Leaves the token unchanged when no framework was selected.
+ */
+export function expandFrameworkPlaceholders(
+  line: string,
+  solidityFramework: "hardhat" | "foundry" | null | undefined,
+): string {
+  if (!solidityFramework) return line;
+  return line.replace(/\{run:framework:([a-zA-Z0-9:_-]+)\}/g, (_, script: string) => {
+    return `{run:${solidityFramework}:${script}}`;
+  });
 }
 
 /** Expands `{pm}` to the selected package manager name (`none` → `pnpm`). */
@@ -141,6 +160,10 @@ export function expandOutroTokens(
   line: string,
   run: (script: string) => string,
   packageManager: PackageManager,
+  solidityFramework?: "hardhat" | "foundry" | null,
 ): string {
-  return expandPmPlaceholder(expandRunPlaceholders(line, run), packageManager);
+  return expandPmPlaceholder(
+    expandRunPlaceholders(expandFrameworkPlaceholders(line, solidityFramework), run),
+    packageManager,
+  );
 }
