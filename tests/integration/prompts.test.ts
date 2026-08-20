@@ -31,12 +31,17 @@ const defaultTemplateCapabilities: TemplateCapabilities = {
   defaults: { frontend: "nextjs-app", solidityFramework: "foundry", packageManager: DEFAULT_OPTIONS.packageManager },
 };
 
-const { mockResolveTemplateCapabilities } = vi.hoisted(() => ({
+const { mockResolveTemplateCapabilities, mockFetchAvailableTemplates } = vi.hoisted(() => ({
   mockResolveTemplateCapabilities: vi.fn(),
+  mockFetchAvailableTemplates: vi.fn(),
 }));
 
 vi.mock("../../src/utils/template-capabilities", () => ({
   resolveTemplateCapabilities: mockResolveTemplateCapabilities,
+}));
+
+vi.mock("../../src/utils/fetch-available-templates", () => ({
+  fetchAvailableTemplates: mockFetchAvailableTemplates,
 }));
 
 // ─── Import the function under test AFTER mocks are registered ───────────────
@@ -62,6 +67,11 @@ describe("promptForMissingOptions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveTemplateCapabilities.mockResolvedValue(defaultTemplateCapabilities);
+    mockFetchAvailableTemplates.mockResolvedValue([
+      { value: "blank", label: "Blank Starter" },
+      { value: "hcs-dao", label: "HCS DAO" },
+      { value: "payments-scheduler", label: "Payments Scheduler" },
+    ]);
     // Default mock return values simulate user accepting defaults
     mockText.mockResolvedValue(DEFAULT_OPTIONS.project);
     mockSelect.mockImplementation((opts: { initialValue?: unknown }) => Promise.resolve(opts.initialValue));
