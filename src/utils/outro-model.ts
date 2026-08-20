@@ -34,8 +34,8 @@ function attachFollowOn(current: TemplateOutroStep, value: string): TemplateOutr
 }
 
 /**
- * Adapts legacy flat `outro.steps` strings into structured sections.
- * Good enough for current published templates; not a perfect parser.
+ * @deprecated Prefer `outro.sections` in `template.json`. Kept to adapt older
+ * flat `outro.steps` strings into structured sections (best-effort parser).
  */
 export function adaptLegacySteps(lines: string[]): TemplateOutroSection[] {
   const steps: TemplateOutroStep[] = [];

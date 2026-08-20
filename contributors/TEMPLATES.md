@@ -72,25 +72,12 @@ Optional `outro.installCommand` overrides the shared skip-install hint (e.g. `"p
 
 When both `sections` and legacy `steps` are present, **`sections` wins**.
 
-### Legacy: `outro.steps`
+### Deprecated: `outro.steps`
 
-Flat string lines are still accepted and adapted into structured steps:
+Flat string lines are still accepted for older templates and adapted into structured steps, but **new templates should use `sections` only**. Built-in starters have already migrated.
 
 - Leading `+` → step `label`
 - Following indented / command-looking lines → `command`, `url`, or `text`
-- Prefer migrating to `sections` when you next touch a template
-
-Example:
-
-```json
-{
-  "create-scaffold-hbar": {
-    "outro": {
-      "steps": ["+Start the frontend:", "  {run:next:dev}", "+Run the harness recipe:", "  {run:harness:run}"]
-    }
-  }
-}
-```
 
 Omit `outro` to keep the standard Scaffold-HBAR next-steps text.
 
@@ -146,6 +133,6 @@ Built-in template resolution uses `TEMPLATE_REPO` in `src/utils/consts.ts` (curr
 
 - `src/utils/fetch-available-templates.ts` — `getTemplateSpec()`, `fetchAvailableTemplates()`
 - `src/tasks/copy-template-files.ts` — giget download + `processTemplateManifest()`
-- `src/utils/outro-model.ts` — structured outro resolution + legacy adapter
+- `src/utils/outro-model.ts` — structured outro resolution + deprecated `steps` adapter
 - `src/utils/harness-recipe.ts` — `.harness/` preservation helpers
 - `tests/unit/harness-recipe-preservation.test.ts` — fixture coverage for copy/filter/npm rewrite

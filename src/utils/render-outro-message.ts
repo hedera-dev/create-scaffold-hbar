@@ -17,13 +17,6 @@ export function formatCommandSnippet(command: string): string {
   return chalk.bgHex(BRAND_COLORS.hederaDark).hex(BRAND_COLORS.textPrimary).bold(` ${command} `);
 }
 
-/** @deprecated Prefer expandOutroTokens + formatCommandSnippet for structured fields. */
-export function expandOutroPlaceholders(line: string, run: (script: string) => string): string {
-  return line.replace(/\{run:([a-zA-Z0-9:_-]+)\}/g, (_, script: string) => {
-    return formatCommandSnippet(run(script));
-  });
-}
-
 /** Generates the run command based on package manager.
  * @param hasArgs - When true, suffix with `--` so appended args reach the script (npm and pnpm).
  */
@@ -112,7 +105,7 @@ function buildDefaultSections(options: Options): TemplateOutroSection[] {
       },
     ];
     if (options.frontend !== "none") {
-      localSteps.push({ label: "Start the frontend", command: run("next:start") });
+      localSteps.push({ label: "Start the frontend", command: run("next:dev") });
     }
 
     const deployTestnet =
@@ -145,7 +138,7 @@ function buildDefaultSections(options: Options): TemplateOutroSection[] {
     return [
       {
         title: "Start the frontend",
-        steps: [{ command: run("next:start") }],
+        steps: [{ command: run("next:dev") }],
       },
     ];
   }
