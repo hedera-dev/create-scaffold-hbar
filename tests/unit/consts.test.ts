@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   SOLIDITY_FRAMEWORKS,
   TEMPLATES,
+  TEMPLATES_FALLBACK,
   FRONTENDS,
   SOLIDITY_FRAMEWORK_OPTIONS,
   NETWORKS,
@@ -93,6 +94,12 @@ describe("TEMPLATES", () => {
     ]);
   });
 
+  it("uses the same list when GitHub template discovery is unavailable", () => {
+    expect(TEMPLATES_FALLBACK).toEqual(TEMPLATES);
+    expect(TEMPLATES_FALLBACK.map(t => t.value)).toContain("tokenize-subscriptions");
+    expect(TEMPLATES_FALLBACK.map(t => t.value)).not.toContain("tokenise-subscriptions");
+  });
+
   it("every template has a non-empty label", () => {
     for (const t of TEMPLATES) {
       expect(t.label.length).toBeGreaterThan(0);
@@ -106,9 +113,6 @@ describe("TEMPLATES", () => {
     }
     expect(TEMPLATE_CAPABILITIES_FALLBACK["blank-template"]).toEqual(
       TEMPLATE_REGISTRY.find(e => e.value === "blank")?.capabilities,
-    );
-    expect(TEMPLATE_CAPABILITIES_FALLBACK["tokenise-subscriptions"]).toEqual(
-      TEMPLATE_REGISTRY.find(e => e.value === "tokenize-subscriptions")?.capabilities,
     );
   });
 });
