@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rename the Tokenize Subscriptions CLI key and git branch from `tokenise-subscriptions` to `tokenize-subscriptions`. `--template tokenise-subscriptions` still resolves.
+
 ### Added
 
 - Fresh changelog baseline for `create-scaffold-hbar`.

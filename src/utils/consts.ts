@@ -20,6 +20,8 @@ export {
   TEMPLATE_REGISTRY,
   getRegistryCapabilities,
   getRegistryEntry,
+  canonicalTemplateValue,
+  branchSuffixForTemplate,
 } from "./template-registry";
 export type { TemplateRegistryCapabilities, TemplateRegistryEntry } from "./template-registry";
 

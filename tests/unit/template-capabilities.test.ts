@@ -66,6 +66,16 @@ describe("resolveTemplateCapabilities", () => {
     expect(caps.frontend).toEqual(["nextjs-app"]);
   });
 
+  it("resolves the retired tokenise-subscriptions key from the registry", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const caps = await resolveTemplateCapabilities("tokenise-subscriptions");
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(caps).toEqual(TEMPLATE_REGISTRY.find(entry => entry.value === "tokenize-subscriptions")?.capabilities);
+  });
+
   it("covers every registry template with explicit capabilities", async () => {
     for (const entry of TEMPLATE_REGISTRY) {
       const caps = await resolveTemplateCapabilities(entry.value);

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { adaptLegacySteps, expandOutroTokens, resolveOutroSections } from "../../src/utils/outro-model";
 
 describe("adaptLegacySteps", () => {
-  it("adapts a tokenise-subscriptions-shaped outro", () => {
+  it("adapts a tokenize-subscriptions-shaped outro", () => {
     const sections = adaptLegacySteps([
       "This template uses Hardhat and deploys to Hedera testnet/mainnet.",
       "+Set up deployer account:",

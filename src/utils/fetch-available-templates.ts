@@ -1,19 +1,17 @@
 import { TEMPLATE_BRANCH_PREFIX, TEMPLATE_LABEL_OVERRIDES, TEMPLATE_REPO, TEMPLATES_FALLBACK } from "./consts";
-import { TEMPLATES } from "./template-registry";
-
-/** Branch name for the "blank" starter template (actual branch is blank-template). */
-const BLANK_TEMPLATE_BRANCH = "blank-template";
+import { TEMPLATES, branchSuffixForTemplate, canonicalTemplateValue } from "./template-registry";
 
 /**
  * Resolves template to a giget spec (owner/repo#branch).
  * - If template contains "/", treat as community (org/repo or org/repo#branch).
- * - Otherwise use TEMPLATE_REPO and branch "templates/<template>" (blank → templates/blank-template).
+ * - Otherwise use TEMPLATE_REPO and branch "templates/<suffix>"
+ *   (`blank` → `templates/blank-template`; aliases such as `tokenise-subscriptions`
+ *   resolve to the current American-English branch).
  */
 export function getTemplateSpec(template: string): string {
   if (template.includes("/")) return template;
   const prefix = TEMPLATE_BRANCH_PREFIX.endsWith("/") ? TEMPLATE_BRANCH_PREFIX : `${TEMPLATE_BRANCH_PREFIX}/`;
-  const branchSuffix = template === "blank" ? BLANK_TEMPLATE_BRANCH : template;
-  const branch = `${prefix}${branchSuffix}`;
+  const branch = `${prefix}${branchSuffixForTemplate(template)}`;
   return `${TEMPLATE_REPO}#${branch}`;
 }
 
@@ -31,11 +29,10 @@ function titleCaseBranch(value: string): string {
 }
 
 /**
- * Normalizes a live branch suffix to the CLI template value.
- * `blank-template` is exposed as `blank` to match defaults and the registry.
+ * Normalizes a live branch suffix (or retired CLI key) to the public template value.
  */
 export function normalizeTemplateValue(branchSuffix: string): string {
-  return branchSuffix === BLANK_TEMPLATE_BRANCH ? "blank" : branchSuffix;
+  return canonicalTemplateValue(branchSuffix);
 }
 
 /**

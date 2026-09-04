@@ -4,7 +4,7 @@ The CLI uses **giget** to download the chosen template. There are **no embedded 
 
 ## Flow
 
-- **Template = branch name**: A built-in key (e.g. `blank`, `payments-scheduler`) is resolved to `https://github.com/buidler-labs/scaffold-hbar#templates/<branch>` (see `getTemplateSpec()` in `src/utils/fetch-available-templates.ts`). The `blank` key maps to branch `templates/blank-template`. Community templates use `org/repo` or `org/repo#branch` as-is.
+- **Template = branch name**: A built-in key (e.g. `blank`, `payments-scheduler`) is resolved to `https://github.com/buidler-labs/scaffold-hbar#templates/<branch>` (see `getTemplateSpec()` in `src/utils/fetch-available-templates.ts`). The `blank` key maps to branch `templates/blank-template`. Retired keys such as `tokenise-subscriptions` map to the current branch via `TEMPLATE_VALUE_ALIASES`. Community templates use `org/repo` or `org/repo#branch` as-is.
 - **List from GitHub API**: In interactive mode, the "Which starter template?" prompt is filled by calling the GitHub API (matching-refs for `templates/*`). If the request fails (e.g. offline), a **fallback list** from `TEMPLATES_FALLBACK` in `src/utils/consts.ts` is used.
 - **Prompt constraints (`template.json`)**: Built-in starters resolve prompt capabilities from the **CLI template registry** (`src/utils/template-registry.ts`) without calling GitHub. Community templates (`org/repo#ref`) still load `template.json` from GitHub. Live `templates/*` branch discovery only **adds** branches not yet listed in the registry when the API is available.
 - **Fetch**: `getTemplateSpec()` and `downloadTemplate(gh:spec)` in `src/tasks/copy-template-files.ts` download the template into a temp dir, then copy into the user's project directory.
@@ -16,7 +16,8 @@ Known starters (labels, hints, frontend / solidity / package-manager capabilitie
 When you ship a new `templates/<name>` branch:
 
 1. Add an entry to `TEMPLATE_REGISTRY` (capabilities/defaults must match that branch’s `template.json`).
-2. Publish a CLI release that includes the registry update.
+2. If you rename a public key, add `TEMPLATE_VALUE_ALIASES` so the old `--template` flag still works and live discovery does not list both names.
+3. Publish a CLI release that includes the registry update.
 
 Until then, a successful live GitHub fetch can still surface the new branch in the menu, but capabilities will use permissive defaults until the registry entry exists.
 
