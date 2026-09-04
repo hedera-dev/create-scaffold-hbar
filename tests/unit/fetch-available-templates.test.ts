@@ -42,8 +42,11 @@ describe("fetchAvailableTemplates", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
 
     const options = await fetchAvailableTemplates();
+    const values = options.map(o => o.value);
 
-    expect(options.map(o => o.value)).toEqual(TEMPLATES.map(t => t.value));
+    expect(values).toEqual(TEMPLATES.map(t => t.value));
+    expect(values).toContain("tokenize-subscriptions");
+    expect(values).not.toContain("tokenise-subscriptions");
     expect(options.find(o => o.value === "bridge")?.label).toBe("Bridge");
   });
 

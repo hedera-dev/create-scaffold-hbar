@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   SOLIDITY_FRAMEWORKS,
   TEMPLATES,
+  TEMPLATES_FALLBACK,
   FRONTENDS,
   SOLIDITY_FRAMEWORK_OPTIONS,
   NETWORKS,
@@ -91,6 +92,12 @@ describe("TEMPLATES", () => {
       "tokenize-subscriptions",
       "x402-pay-per-use",
     ]);
+  });
+
+  it("uses the same list when GitHub template discovery is unavailable", () => {
+    expect(TEMPLATES_FALLBACK).toEqual(TEMPLATES);
+    expect(TEMPLATES_FALLBACK.map(t => t.value)).toContain("tokenize-subscriptions");
+    expect(TEMPLATES_FALLBACK.map(t => t.value)).not.toContain("tokenise-subscriptions");
   });
 
   it("every template has a non-empty label", () => {
