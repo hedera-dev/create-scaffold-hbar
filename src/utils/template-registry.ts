@@ -7,6 +7,8 @@ import type { Frontend, PackageManager, SolidityFramework } from "../types";
  * GitHub API quota for known templates. When adding a `templates/<name>` branch:
  * 1. Add/update an entry here (value = branch suffix; use `blank` for blank-template).
  * 2. Mirror capabilities/defaults from that branch's `template.json`.
+ * 3. If you rename a public key, add a {@link TEMPLATE_VALUE_ALIASES} entry so the
+ *    old CLI flag and leftover git branch do not appear as a second prompt option.
  * Live GitHub fetch only discovers branches not yet listed here.
  */
 export type TemplateRegistryCapabilities = {
@@ -27,6 +29,34 @@ export type TemplateRegistryEntry = {
   hint?: string;
   capabilities: TemplateRegistryCapabilities;
 };
+
+/**
+ * Live git branch suffixes (or retired CLI keys) → public registry value.
+ * `blank-template` is the git name for `blank`. `tokenise-subscriptions` is the
+ * British-English slug retired in favor of `tokenize-subscriptions`.
+ */
+export const TEMPLATE_VALUE_ALIASES: Record<string, string> = {
+  "blank-template": "blank",
+  "tokenise-subscriptions": "tokenize-subscriptions",
+};
+
+/**
+ * Public CLI values whose git branch suffix differs from the key.
+ */
+export const TEMPLATE_BRANCH_ALIASES: Record<string, string> = {
+  blank: "blank-template",
+};
+
+/** Canonical public CLI value for a live branch suffix or retired key. */
+export function canonicalTemplateValue(template: string): string {
+  return TEMPLATE_VALUE_ALIASES[template] ?? template;
+}
+
+/** `templates/` branch suffix for a public CLI value or alias. */
+export function branchSuffixForTemplate(template: string): string {
+  const canonical = canonicalTemplateValue(template);
+  return TEMPLATE_BRANCH_ALIASES[canonical] ?? canonical;
+}
 
 export const TEMPLATE_REGISTRY: readonly TemplateRegistryEntry[] = [
   {
@@ -96,7 +126,7 @@ export const TEMPLATE_REGISTRY: readonly TemplateRegistryEntry[] = [
     },
   },
   {
-    value: "tokenise-subscriptions",
+    value: "tokenize-subscriptions",
     label: "Tokenize Subscriptions",
     hint: "NFT subscription marketplace with HTS",
     capabilities: {
@@ -127,26 +157,35 @@ export const TEMPLATES = TEMPLATE_REGISTRY.map(({ value, label, hint }) =>
 /** Fallback when live branch discovery fails. Same as {@link TEMPLATES}. */
 export const TEMPLATES_FALLBACK = TEMPLATES;
 
-/** Label overrides for live-fetched branch suffixes (including `blank-template`). */
+function registryEntry(canonical: string): TemplateRegistryEntry {
+  const entry = TEMPLATE_REGISTRY.find(e => e.value === canonical);
+  if (!entry) {
+    throw new Error(`Missing template registry entry for "${canonical}"`);
+  }
+  return entry;
+}
+
+/** Label overrides for live-fetched branch suffixes and retired CLI keys. */
 export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
-  "blank-template": "Blank Starter",
   ...Object.fromEntries(TEMPLATE_REGISTRY.map(entry => [entry.value, entry.label])),
+  ...Object.fromEntries(
+    Object.entries(TEMPLATE_VALUE_ALIASES).map(([alias, canonical]) => [alias, registryEntry(canonical).label]),
+  ),
 };
 
 /**
- * Capabilities keyed by template value (and `blank-template` alias).
+ * Capabilities keyed by template value and aliases (`blank-template`, old slugs).
  * Prefer {@link getRegistryCapabilities} over reading this map directly.
  */
 export const TEMPLATE_CAPABILITIES_FALLBACK: Record<string, TemplateRegistryCapabilities> = {
   ...Object.fromEntries(TEMPLATE_REGISTRY.map(entry => [entry.value, entry.capabilities])),
-  "blank-template": TEMPLATE_REGISTRY.find(e => e.value === "blank")!.capabilities,
+  ...Object.fromEntries(
+    Object.entries(TEMPLATE_VALUE_ALIASES).map(([alias, canonical]) => [alias, registryEntry(canonical).capabilities]),
+  ),
 };
 
 export function getRegistryEntry(template: string): TemplateRegistryEntry | undefined {
-  if (template === "blank-template") {
-    return TEMPLATE_REGISTRY.find(entry => entry.value === "blank");
-  }
-  return TEMPLATE_REGISTRY.find(entry => entry.value === template);
+  return TEMPLATE_REGISTRY.find(entry => entry.value === canonicalTemplateValue(template));
 }
 
 export function getRegistryCapabilities(template: string): TemplateRegistryCapabilities | undefined {

@@ -2,9 +2,7 @@ import type { Frontend, PackageManager, SolidityFramework, TemplateManifest } fr
 import { TemplateManifestSchema } from "../types";
 import { TEMPLATE_REPO } from "./consts";
 import { parseGithubCommunityTemplate } from "./parse-github-template-ref";
-import { getRegistryCapabilities } from "./template-registry";
-
-const BLANK_TEMPLATE_BRANCH = "blank-template";
+import { branchSuffixForTemplate, getRegistryCapabilities } from "./template-registry";
 
 export type TemplateCapabilities = {
   frontend: Frontend[];
@@ -23,10 +21,6 @@ const DEFAULT_CAPABILITIES: TemplateCapabilities = {
   packageManager: ["yarn", "npm"],
   defaults: {},
 };
-
-function branchNameForTemplate(template: string): string {
-  return template === "blank" ? BLANK_TEMPLATE_BRANCH : template;
-}
 
 function fromManifest(manifest: TemplateManifest): TemplateCapabilities | null {
   const capabilities = manifest["create-scaffold-hbar"]?.capabilities;
@@ -106,7 +100,7 @@ export async function resolveTemplateCapabilities(template: string): Promise<Tem
   const [owner, repo] = TEMPLATE_REPO.split("/");
   if (!owner || !repo) return DEFAULT_CAPABILITIES;
 
-  const branch = `templates/${branchNameForTemplate(template)}`;
+  const branch = `templates/${branchSuffixForTemplate(template)}`;
   const manifest = await fetchTemplateManifestFromGithub(owner, repo, branch);
   if (manifest) {
     return fromManifest(manifest) ?? DEFAULT_CAPABILITIES;
