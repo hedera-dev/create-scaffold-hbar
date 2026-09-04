@@ -1,5 +1,15 @@
 # create-scaffold-hbar
 
+## 0.4.0
+
+### Minor Changes
+
+- 3d401d3: Quiet yarn/skills/`forge install` output under Listr status, structured template outro (`sections`, `{run:framework:…}`), and an offline template registry to avoid GitHub rate limits. Prefer `outro.sections` (`outro.steps` remains accepted but deprecated). Default outro frontend command is `next:dev`.
+
+### Patch Changes
+
+- e8fa929: Rename the Tokenize Subscriptions CLI key from `tokenise-subscriptions` to `tokenize-subscriptions`. The old key is not kept as an alias.
+
 ## 0.2.8
 
 ### Patch Changes
@@ -18,18 +28,3 @@
 
 - dc9c448: Only support yarn package manager
 - add install hedera skills and manage external templates
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Changed
-
-- Rename the Tokenize Subscriptions CLI key and git branch to `tokenize-subscriptions`. The British-English `tokenise-subscriptions` key is removed.
-
-### Added
-
-- Fresh changelog baseline for `create-scaffold-hbar`.
