@@ -9,10 +9,9 @@ import { TEMPLATE_REPO } from "../../src/utils/consts";
 import { TEMPLATES } from "../../src/utils/template-registry";
 
 describe("normalizeTemplateValue", () => {
-  it("maps blank-template to blank and tokenise-subscriptions to tokenize-subscriptions", () => {
+  it("maps blank-template to blank", () => {
     expect(normalizeTemplateValue("blank-template")).toBe("blank");
     expect(normalizeTemplateValue("bridge")).toBe("bridge");
-    expect(normalizeTemplateValue("tokenise-subscriptions")).toBe("tokenize-subscriptions");
     expect(normalizeTemplateValue("tokenize-subscriptions")).toBe("tokenize-subscriptions");
   });
 });
@@ -71,36 +70,12 @@ describe("fetchAvailableTemplates", () => {
     expect(values).not.toContain("blank-template");
     expect(options.find(o => o.value === "blank")?.label).toBe("Blank Starter");
   });
-
-  it("collapses the retired tokenise-subscriptions branch into tokenize-subscriptions", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            { ref: "refs/heads/templates/tokenise-subscriptions" },
-            { ref: "refs/heads/templates/tokenize-subscriptions" },
-          ]),
-      }),
-    );
-
-    const options = await fetchAvailableTemplates();
-    const matches = options.filter(o => o.value === "tokenize-subscriptions" || o.value === "tokenise-subscriptions");
-
-    expect(matches).toHaveLength(1);
-    expect(matches[0]).toMatchObject({
-      value: "tokenize-subscriptions",
-      label: "Tokenize Subscriptions",
-    });
-  });
 });
 
 describe("getTemplateSpec", () => {
-  it("maps built-in keys and retired aliases to git branches", () => {
+  it("maps built-in keys to git branches", () => {
     expect(getTemplateSpec("blank")).toBe(`${TEMPLATE_REPO}#templates/blank-template`);
     expect(getTemplateSpec("tokenize-subscriptions")).toBe(`${TEMPLATE_REPO}#templates/tokenize-subscriptions`);
-    expect(getTemplateSpec("tokenise-subscriptions")).toBe(`${TEMPLATE_REPO}#templates/tokenize-subscriptions`);
     expect(getTemplateSpec("acme/demo#main")).toBe("acme/demo#main");
   });
 });

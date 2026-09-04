@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Rename the Tokenize Subscriptions CLI key and git branch from `tokenise-subscriptions` to `tokenize-subscriptions`. `--template tokenise-subscriptions` still resolves.
+- Rename the Tokenize Subscriptions CLI key and git branch to `tokenize-subscriptions`. The British-English `tokenise-subscriptions` key is removed.
 
 ### Added
 

@@ -7,8 +7,6 @@ import type { Frontend, PackageManager, SolidityFramework } from "../types";
  * GitHub API quota for known templates. When adding a `templates/<name>` branch:
  * 1. Add/update an entry here (value = branch suffix; use `blank` for blank-template).
  * 2. Mirror capabilities/defaults from that branch's `template.json`.
- * 3. If you rename a public key, add a {@link TEMPLATE_VALUE_ALIASES} entry so the
- *    old CLI flag and leftover git branch do not appear as a second prompt option.
  * Live GitHub fetch only discovers branches not yet listed here.
  */
 export type TemplateRegistryCapabilities = {
@@ -31,13 +29,10 @@ export type TemplateRegistryEntry = {
 };
 
 /**
- * Live git branch suffixes (or retired CLI keys) → public registry value.
- * `blank-template` is the git name for `blank`. `tokenise-subscriptions` is the
- * British-English slug retired in favor of `tokenize-subscriptions`.
+ * Live git branch suffixes whose public CLI value differs (currently only blank).
  */
 export const TEMPLATE_VALUE_ALIASES: Record<string, string> = {
   "blank-template": "blank",
-  "tokenise-subscriptions": "tokenize-subscriptions",
 };
 
 /**
@@ -47,12 +42,12 @@ export const TEMPLATE_BRANCH_ALIASES: Record<string, string> = {
   blank: "blank-template",
 };
 
-/** Canonical public CLI value for a live branch suffix or retired key. */
+/** Canonical public CLI value for a live branch suffix. */
 export function canonicalTemplateValue(template: string): string {
   return TEMPLATE_VALUE_ALIASES[template] ?? template;
 }
 
-/** `templates/` branch suffix for a public CLI value or alias. */
+/** `templates/` branch suffix for a public CLI value. */
 export function branchSuffixForTemplate(template: string): string {
   const canonical = canonicalTemplateValue(template);
   return TEMPLATE_BRANCH_ALIASES[canonical] ?? canonical;
@@ -165,7 +160,7 @@ function registryEntry(canonical: string): TemplateRegistryEntry {
   return entry;
 }
 
-/** Label overrides for live-fetched branch suffixes and retired CLI keys. */
+/** Label overrides for live-fetched branch suffixes (including `blank-template`). */
 export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
   ...Object.fromEntries(TEMPLATE_REGISTRY.map(entry => [entry.value, entry.label])),
   ...Object.fromEntries(
@@ -174,7 +169,7 @@ export const TEMPLATE_LABEL_OVERRIDES: Record<string, string> = {
 };
 
 /**
- * Capabilities keyed by template value and aliases (`blank-template`, old slugs).
+ * Capabilities keyed by template value (and `blank-template` alias).
  * Prefer {@link getRegistryCapabilities} over reading this map directly.
  */
 export const TEMPLATE_CAPABILITIES_FALLBACK: Record<string, TemplateRegistryCapabilities> = {

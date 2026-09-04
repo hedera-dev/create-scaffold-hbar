@@ -5,8 +5,7 @@ import { TEMPLATES, branchSuffixForTemplate, canonicalTemplateValue } from "./te
  * Resolves template to a giget spec (owner/repo#branch).
  * - If template contains "/", treat as community (org/repo or org/repo#branch).
  * - Otherwise use TEMPLATE_REPO and branch "templates/<suffix>"
- *   (`blank` → `templates/blank-template`; aliases such as `tokenise-subscriptions`
- *   resolve to the current American-English branch).
+ *   (`blank` → `templates/blank-template`).
  */
 export function getTemplateSpec(template: string): string {
   if (template.includes("/")) return template;
@@ -29,7 +28,8 @@ function titleCaseBranch(value: string): string {
 }
 
 /**
- * Normalizes a live branch suffix (or retired CLI key) to the public template value.
+ * Normalizes a live branch suffix to the public template value.
+ * `blank-template` is exposed as `blank` to match the registry.
  */
 export function normalizeTemplateValue(branchSuffix: string): string {
   return canonicalTemplateValue(branchSuffix);

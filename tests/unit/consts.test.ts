@@ -107,9 +107,6 @@ describe("TEMPLATES", () => {
     expect(TEMPLATE_CAPABILITIES_FALLBACK["blank-template"]).toEqual(
       TEMPLATE_REGISTRY.find(e => e.value === "blank")?.capabilities,
     );
-    expect(TEMPLATE_CAPABILITIES_FALLBACK["tokenise-subscriptions"]).toEqual(
-      TEMPLATE_REGISTRY.find(e => e.value === "tokenize-subscriptions")?.capabilities,
-    );
   });
 });
 
