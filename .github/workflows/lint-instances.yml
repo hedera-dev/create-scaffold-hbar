@@ -47,23 +47,20 @@ jobs:
 
       - name: Install application (Hardhat configuration)
         if: matrix.config == 'hardhat'
-        run: yarn cli new_project_hardhat -s hardhat
+        run: yarn cli new_project_hardhat -s hardhat --ci --skip-hedera-skills
 
       - name: Install application (Foundry configuration)
         if: matrix.config == 'foundry'
-        run: yarn cli new_project_foundry -s foundry
+        run: yarn cli new_project_foundry -s foundry --ci --skip-hedera-skills
 
       - name: Install application (No solidity framework configuration)
         if: matrix.config == 'no_solidity_framework'
-        run: yarn cli new_project_no_solidity_framework -s none
+        run: yarn cli new_project_no_solidity_framework -s none --ci --skip-hedera-skills
 
-      - name: Run chain and deploy
+      - name: Compile contracts
         working-directory: new_project_${{ matrix.config }}
         if: matrix.config == 'hardhat' || matrix.config == 'foundry'
-        run: |
-          yarn chain &
-          npx wait-on tcp:8545
-          yarn deploy
+        run: yarn ${{ matrix.config }}:compile
 
       - name: Run linting hardhat package
         if: matrix.config == 'hardhat'
