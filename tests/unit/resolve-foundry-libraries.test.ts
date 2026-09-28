@@ -8,6 +8,8 @@ import {
   parseGitmodules,
   parseRemappedLibNames,
   resolveFoundryLibraries,
+  stripFoundryGitmodules,
+  withoutFoundryGitmodules,
 } from "../../src/utils/resolve-foundry-libraries";
 
 const tempDirs: string[] = [];
@@ -63,6 +65,66 @@ describe("parseRemappedLibNames", () => {
         pyth-sdk-solidity/=lib/pyth-sdk-solidity/
       `),
     ).toEqual(["forge-std", "openzeppelin-contracts", "pyth-sdk-solidity"]);
+  });
+});
+
+describe("withoutFoundryGitmodules", () => {
+  it("removes foundry lib sections and leaves other submodules", () => {
+    const contents = gitmodules([
+      {
+        name: "packages/foundry/lib/forge-std",
+        path: "packages/foundry/lib/forge-std",
+        url: "https://github.com/foundry-rs/forge-std",
+      },
+      {
+        name: "vendor/other",
+        path: "vendor/other",
+        url: "https://github.com/example/other",
+      },
+    ]);
+
+    expect(withoutFoundryGitmodules(contents)).toBe(
+      `[submodule "vendor/other"]
+\tpath = vendor/other
+\turl = https://github.com/example/other
+`,
+    );
+  });
+
+  it("returns an empty string when every section is a foundry lib", () => {
+    expect(
+      withoutFoundryGitmodules(
+        gitmodules([
+          {
+            name: "packages/foundry/lib/openzeppelin-contracts",
+            path: "packages/foundry/lib/openzeppelin-contracts",
+            url: "https://github.com/OpenZeppelin/openzeppelin-contracts",
+          },
+        ]),
+      ),
+    ).toBe("");
+  });
+});
+
+describe("stripFoundryGitmodules", () => {
+  afterEach(async () => {
+    await Promise.all(tempDirs.splice(0).map(tempDir => fs.promises.rm(tempDir, { recursive: true, force: true })));
+  });
+
+  it("deletes .gitmodules when it only lists foundry libs", async () => {
+    const foundryWorkspacePath = await makeWorkspace({
+      gitmodules: gitmodules([
+        {
+          name: "packages/foundry/lib/openzeppelin-contracts",
+          path: "packages/foundry/lib/openzeppelin-contracts",
+          url: "https://github.com/OpenZeppelin/openzeppelin-contracts",
+        },
+      ]),
+    });
+    const rootDir = path.resolve(foundryWorkspacePath, "../..");
+
+    await expect(stripFoundryGitmodules(rootDir)).resolves.toBe(true);
+    await expect(fs.promises.access(path.join(rootDir, ".gitmodules"))).rejects.toThrow();
   });
 });
 

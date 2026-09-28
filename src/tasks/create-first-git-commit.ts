@@ -3,7 +3,7 @@ import { Options } from "../types";
 import path from "path";
 import fs from "fs";
 import { SOLIDITY_FRAMEWORKS } from "../utils/consts";
-import { resolveFoundryLibraries } from "../utils/resolve-foundry-libraries";
+import { resolveFoundryLibraries, stripFoundryGitmodules } from "../utils/resolve-foundry-libraries";
 import { runTaskCommand, type TaskCommandTask } from "../utils/run-task-command";
 import packageJson from "../../package.json";
 
@@ -51,13 +51,17 @@ export async function createFirstGitCommit(targetDir: string, options: Options, 
       const libDir = path.join(foundryWorkSpacePath, "lib");
       const foundryLibraries = await resolveFoundryLibraries(foundryWorkSpacePath);
 
-      // Remove any pre-existing lib directories copied from the template so that
-      // `forge install` (which adds git submodules) doesn't fail with
-      // "already exists and is not a valid git repo".
+      // Drop copied lib dirs and their .gitmodules entries before `forge install`.
+      // Leftover dirs fail with "already exists and is not a valid git repo".
+      // Leftover entries fail on forge >= 1.8 when .gitmodules lists a path the index has no gitlink for.
+      let preparing = false;
       if (fs.existsSync(libDir)) {
-        task.output = "Preparing Foundry libraries…";
         await fs.promises.rm(libDir, { recursive: true, force: true });
-        // Stage the removal so the initial commit doesn't reference the old files
+        preparing = true;
+      }
+      if (await stripFoundryGitmodules(targetDir)) preparing = true;
+      if (preparing) {
+        task.output = "Preparing Foundry libraries…";
         await execa("git", ["add", "-A"], { cwd: targetDir });
         await execa("git", ["commit", "--amend", "--no-edit", "--no-verify", "--no-gpg-sign"], { cwd: targetDir });
       }
