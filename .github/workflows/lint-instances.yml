@@ -40,14 +40,7 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           cache: false
-          version: v1.4.0
-
-      - name: Install foundryup
-        if: matrix.config == 'foundry'
-        run: |
-          curl -L https://foundry.paradigm.xyz -o foundryup-init.sh
-          bash foundryup-init.sh
-          echo "$HOME/.config/.foundry/bin" >> $GITHUB_PATH
+          version: v1.8.1
 
       - name: Build
         run: yarn build
@@ -58,9 +51,7 @@ jobs:
 
       - name: Install application (Foundry configuration)
         if: matrix.config == 'foundry'
-        run: |
-          export PATH="$HOME/.config/.foundry/bin:$PATH"
-          yarn cli new_project_foundry -s foundry
+        run: yarn cli new_project_foundry -s foundry
 
       - name: Install application (No solidity framework configuration)
         if: matrix.config == 'no_solidity_framework'

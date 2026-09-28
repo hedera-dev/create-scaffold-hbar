@@ -11,8 +11,8 @@ describe("parseGithubCommunityTemplate", () => {
   });
 
   it("parses owner/repo#branch", () => {
-    expect(parseGithubCommunityTemplate("buidler-labs/scaffold-hbar#draft-templates/hedera-demo")).toEqual({
-      owner: "buidler-labs",
+    expect(parseGithubCommunityTemplate("hedera-dev/scaffold-hbar#draft-templates/hedera-demo")).toEqual({
+      owner: "hedera-dev",
       repo: "scaffold-hbar",
       ref: "draft-templates/hedera-demo",
     });

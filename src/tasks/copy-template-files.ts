@@ -141,9 +141,6 @@ function normalizeWorkspacePackagesForNpm(
       for (const key of Object.keys(scripts)) {
         if (typeof scripts[key] !== "string") continue;
         scripts[key] = transformScriptForPackageManager(scripts[key], packageManager);
-
-        // In npm mode, convert yarn binary invocations to npx.
-        scripts[key] = scripts[key].replace(/\bnpm run bgipfs\b/g, "npx bgipfs");
       }
     }
 
