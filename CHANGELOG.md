@@ -1,5 +1,11 @@
 # create-scaffold-hbar
 
+## 0.4.1
+
+### Patch Changes
+
+- c0f5afe: Drop template Foundry submodule entries before `forge install`, so scaffolding on forge 1.8+ does not fail when `.gitmodules` already lists those libraries.
+
 ## 0.4.0
 
 ### Minor Changes
