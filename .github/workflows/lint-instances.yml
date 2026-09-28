@@ -55,7 +55,7 @@ jobs:
 
       - name: Install application (No solidity framework configuration)
         if: matrix.config == 'no_solidity_framework'
-        run: yarn cli new_project_no_solidity_framework -s none --ci --skip-hedera-skills
+        run: yarn cli new_project_no_solidity_framework -t hedera-demo -s none --ci --skip-hedera-skills
 
       - name: Compile contracts
         working-directory: new_project_${{ matrix.config }}
