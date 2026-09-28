@@ -63,6 +63,46 @@ export function parseGitmodules(contents: string): GitmoduleEntry[] {
   return entries;
 }
 
+const FOUNDRY_LIB_SUBMODULE_PREFIX = "packages/foundry/lib/";
+
+/** Drops Foundry lib submodule sections. Empty string means the file should be removed. */
+export function withoutFoundryGitmodules(contents: string): string {
+  const drop = new Set(
+    parseGitmodules(contents)
+      .filter(entry => entry.path.startsWith(FOUNDRY_LIB_SUBMODULE_PREFIX))
+      .map(entry => entry.name),
+  );
+  if (drop.size === 0) return contents;
+
+  let skip = false;
+  const kept = contents.split("\n").filter(line => {
+    const section = line.trim().match(/^\[submodule\s+"([^"]+)"\]$/);
+    if (section) skip = drop.has(section[1]);
+    return !skip;
+  });
+
+  const next = kept
+    .join("\n")
+    .replace(/^\n+/, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return next.length > 0 ? `${next}\n` : "";
+}
+
+/** Removes Foundry lib entries so a later `forge install` can recreate them. */
+export async function stripFoundryGitmodules(targetDir: string): Promise<boolean> {
+  const gitmodulesPath = path.join(targetDir, ".gitmodules");
+  if (!fs.existsSync(gitmodulesPath)) return false;
+
+  const contents = await fs.promises.readFile(gitmodulesPath, "utf8");
+  const next = withoutFoundryGitmodules(contents);
+  if (next === contents) return false;
+
+  if (next.length === 0) await fs.promises.rm(gitmodulesPath);
+  else await fs.promises.writeFile(gitmodulesPath, next);
+  return true;
+}
+
 export function githubInstallSpecFromUrl(url: string): string | undefined {
   const normalized = url.trim().replace(/\.git$/, "");
 
