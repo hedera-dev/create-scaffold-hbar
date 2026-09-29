@@ -26,7 +26,7 @@ npx create-scaffold-hbar@latest --template {github-owner}/{template-repo}#{branc
 Use one of these two workflows:
 
 1. **Fork-first workflow (recommended):**
-   - Fork [`buidler-labs/scaffold-hbar`](https://github.com/buidler-labs/scaffold-hbar)
+   - Fork [`hedera-dev/scaffold-hbar`](https://github.com/hedera-dev/scaffold-hbar)
    - Keep only the template shape you want to distribute
    - Publish and version your template branches
 

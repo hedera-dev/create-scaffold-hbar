@@ -40,39 +40,27 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           cache: false
-          version: v1.4.0
-
-      - name: Install foundryup
-        if: matrix.config == 'foundry'
-        run: |
-          curl -L https://foundry.paradigm.xyz -o foundryup-init.sh
-          bash foundryup-init.sh
-          echo "$HOME/.config/.foundry/bin" >> $GITHUB_PATH
+          version: v1.8.1
 
       - name: Build
         run: yarn build
 
       - name: Install application (Hardhat configuration)
         if: matrix.config == 'hardhat'
-        run: yarn cli new_project_hardhat -s hardhat
+        run: yarn cli new_project_hardhat -s hardhat --ci --skip-hedera-skills
 
       - name: Install application (Foundry configuration)
         if: matrix.config == 'foundry'
-        run: |
-          export PATH="$HOME/.config/.foundry/bin:$PATH"
-          yarn cli new_project_foundry -s foundry
+        run: yarn cli new_project_foundry -s foundry --ci --skip-hedera-skills
 
       - name: Install application (No solidity framework configuration)
         if: matrix.config == 'no_solidity_framework'
-        run: yarn cli new_project_no_solidity_framework -s none
+        run: yarn cli new_project_no_solidity_framework -t hedera-demo -s none --ci --skip-hedera-skills
 
-      - name: Run chain and deploy
+      - name: Compile contracts
         working-directory: new_project_${{ matrix.config }}
         if: matrix.config == 'hardhat' || matrix.config == 'foundry'
-        run: |
-          yarn chain &
-          npx wait-on tcp:8545
-          yarn deploy
+        run: yarn ${{ matrix.config }}:compile
 
       - name: Run linting hardhat package
         if: matrix.config == 'hardhat'
