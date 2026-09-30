@@ -5,6 +5,9 @@ import type { PackageManager } from "../types";
 
 const REQUIRED_FOUNDRY_VERSION = "1.4.0";
 const REQUIRED_NPM_VERSION = "8.0.0"; // npm workspaces support
+// forge >= 1.8 sends EIP-1898 block objects that the Hedera JSON-RPC relay rejects on state
+// Remove once https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/5826 is resolved.
+const FOUNDRY_EIP1898_RELAY_BREAK_VERSION = "1.8.0";
 
 // Custom error for Foundry validation
 class FoundryValidationError extends Error {
@@ -44,6 +47,15 @@ export const validateFoundry = async () => {
  ${chalk.bold.yellow("Checkout: https://getfoundry.sh")}
     `;
       throw new FoundryValidationError(message);
+    }
+    if (semver.gte(version, FOUNDRY_EIP1898_RELAY_BREAK_VERSION)) {
+      console.warn(`
+ ${chalk.bold.yellow("Warning: forge >= 1.8.0 detected.")}
+ ${chalk.yellow("`forge script` deploys and fork tests against the Hedera JSON-RPC relay currently fail")}
+ ${chalk.yellow("(relay rejects EIP-1898 block objects). Compiling and local tests are unaffected.")}
+ ${chalk.yellow("To deploy or fork-test, pin forge until the relay ships support: foundryup -v v1.7.1")}
+ ${chalk.yellow("Details: https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/5826")}
+`);
     }
   } catch (error) {
     // Re-throw custom validation errors
