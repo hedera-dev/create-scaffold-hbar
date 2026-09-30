@@ -6,7 +6,6 @@ import type { PackageManager } from "../types";
 const REQUIRED_FOUNDRY_VERSION = "1.4.0";
 const REQUIRED_NPM_VERSION = "8.0.0"; // npm workspaces support
 // forge >= 1.8 sends EIP-1898 block objects that the Hedera JSON-RPC relay rejects on state
-// getters, breaking `forge script` deploys and fork tests. Compile and local tests work.
 // Remove once https://github.com/hiero-ledger/hiero-json-rpc-relay/issues/5826 is resolved.
 const FOUNDRY_EIP1898_RELAY_BREAK_VERSION = "1.8.0";
 
