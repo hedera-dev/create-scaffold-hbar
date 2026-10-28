@@ -45,8 +45,12 @@ export async function cli(args: Args) {
         }
       }
     }
+    // Foundry is a system toolchain, so it is installed on demand. Hardhat needs no
+    // equivalent step: it is a workspace devDependency and arrives with the install.
     if (options.solidityFramework === SOLIDITY_FRAMEWORKS.FOUNDRY) {
       await validateFoundry();
+    } else if (options.solidityFramework === SOLIDITY_FRAMEWORKS.HARDHAT && options.install) {
+      console.log(chalk.dim("\nHardhat ships with the template and is installed with your dependencies."));
     }
 
     await createProject(options);

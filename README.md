@@ -26,7 +26,9 @@ create-scaffold-hbar is an interactive CLI (like `create-next-app` or `create-re
 - **Yarn** (the scaffolded projects use Yarn workspaces; npm and pnpm are not supported)  
   Install via Corepack: `corepack enable && corepack prepare yarn@stable --activate`
 
-If you choose **Foundry** as the Solidity framework, you need Foundry installed:
+If you choose **Foundry** as the Solidity framework, Foundry is **installed automatically**
+when `forge` is missing (or older than 1.4.0), using the official installer plus `foundryup`.
+This writes to `~/.foundry` and updates your shell profile. To set it up yourself beforehand:
 
 - **Official installer** (includes `forge` and `foundryup`):
   ```bash
@@ -42,7 +44,18 @@ If you choose **Foundry** as the Solidity framework, you need Foundry installed:
   ```
   Update later with `brew upgrade foundry` (Homebrew does not install the `foundryup` command).
 
-If you choose **Hardhat** or **none**, no extra install is required.
+Notes on the automatic install:
+
+- **Windows** is not auto-installed (the installer is a shell script); the CLI prints the
+  commands above instead.
+- A **Homebrew**-managed `forge` that is too old is _not_ replaced, since that would leave two
+  toolchains with `~/.foundry/bin` shadowing the brew one. The CLI asks you to run
+  `brew upgrade foundry`.
+- If `forge` already resolves on your `PATH`, the CLI leaves `PATH` alone, so an existing
+  install is never shadowed by one in `~/.foundry/bin`.
+
+If you choose **Hardhat** or **none**, no extra install is required — Hardhat is a workspace
+dependency and arrives with your dependency install.
 
 ---
 
