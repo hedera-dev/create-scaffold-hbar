@@ -38,22 +38,34 @@ export async function createProject(options: Options) {
         },
       },
       {
-        title: `📦 Installing dependencies with ${options.packageManager}`,
-        task: (_, task) => installPackages(targetDirectory, task, options.packageManager),
-        skip: () => {
-          if (options.packageManager === "none") {
-            return "Skipped — this template manages dependency installation outside create-scaffold-hbar";
-          }
-          if (!options.install) {
-            return "Manually skipped, since `--skip-install` flag was passed";
-          }
-          return false;
-        },
-      },
-      {
-        title: "📚 Installing Hedera Skills",
-        task: (_, task) => installHederaSkillsMarketplace(targetDirectory, task),
-        skip: () => (!options.installHederaSkills ? "Skipped — install Hedera Skills was not selected" : false),
+        // Dependency install and the Hedera Skills fetch are both network-bound and touch
+        // disjoint paths (node_modules/ vs .claude/), so running them together hides the
+        // skills download inside the much longer install.
+        title: "📦 Installing dependencies and Hedera Skills",
+        task: (_, task) =>
+          task.newListr(
+            [
+              {
+                title: `📦 Installing dependencies with ${options.packageManager}`,
+                task: (_, subtask) => installPackages(targetDirectory, subtask, options.packageManager),
+                skip: () => {
+                  if (options.packageManager === "none") {
+                    return "Skipped — this template manages dependency installation outside create-scaffold-hbar";
+                  }
+                  if (!options.install) {
+                    return "Manually skipped, since `--skip-install` flag was passed";
+                  }
+                  return false;
+                },
+              },
+              {
+                title: "📚 Installing Hedera Skills",
+                task: (_, subtask) => installHederaSkillsMarketplace(targetDirectory, subtask),
+                skip: () => (!options.installHederaSkills ? "Skipped — install Hedera Skills was not selected" : false),
+              },
+            ],
+            { concurrent: true, rendererOptions: { collapseSubtasks: false, collapseSkips: false } },
+          ),
       },
       {
         title: "🪄 Formatting files",
