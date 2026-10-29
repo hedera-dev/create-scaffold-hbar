@@ -5,6 +5,7 @@ import {
   prettierFormat,
   installPackages,
   installHederaSkillsMarketplace,
+  installFoundryLibraries,
 } from "./tasks";
 import type { Options } from "./types";
 import { renderOutroMessage } from "./utils/render-outro-message";
@@ -38,22 +39,43 @@ export async function createProject(options: Options) {
         },
       },
       {
-        title: `📦 Installing dependencies with ${options.packageManager}`,
-        task: (_, task) => installPackages(targetDirectory, task, options.packageManager),
-        skip: () => {
-          if (options.packageManager === "none") {
-            return "Skipped — this template manages dependency installation outside create-scaffold-hbar";
-          }
-          if (!options.install) {
-            return "Manually skipped, since `--skip-install` flag was passed";
-          }
-          return false;
-        },
-      },
-      {
-        title: "📚 Installing Hedera Skills",
-        task: (_, task) => installHederaSkillsMarketplace(targetDirectory, task),
-        skip: () => (!options.installHederaSkills ? "Skipped — install Hedera Skills was not selected" : false),
+        // Dependency install, the Hedera Skills fetch and the Foundry lib clones are all
+        // network-bound and touch disjoint paths (node_modules/ vs .claude/ vs
+        // packages/foundry/lib/), so running them together hides the shorter two inside
+        // the much longer install.
+        title: "📦 Installing dependencies, Hedera Skills and Foundry libraries",
+        task: (_, task) =>
+          task.newListr(
+            [
+              {
+                title: `📦 Installing dependencies with ${options.packageManager}`,
+                task: (_, subtask) => installPackages(targetDirectory, subtask, options.packageManager),
+                skip: () => {
+                  if (options.packageManager === "none") {
+                    return "Skipped — this template manages dependency installation outside create-scaffold-hbar";
+                  }
+                  if (!options.install) {
+                    return "Manually skipped, since `--skip-install` flag was passed";
+                  }
+                  return false;
+                },
+              },
+              {
+                title: "📚 Installing Hedera Skills",
+                task: (_, subtask) => installHederaSkillsMarketplace(targetDirectory, subtask),
+                skip: () => (!options.installHederaSkills ? "Skipped — install Hedera Skills was not selected" : false),
+              },
+              {
+                title: "🔨 Installing Foundry libraries",
+                task: (_, subtask) => installFoundryLibraries(targetDirectory, subtask),
+                skip: () =>
+                  options.solidityFramework !== SOLIDITY_FRAMEWORKS.FOUNDRY
+                    ? "Skipped — Foundry was not selected"
+                    : false,
+              },
+            ],
+            { concurrent: true, rendererOptions: { collapseSubtasks: false, collapseSkips: false } },
+          ),
       },
       {
         title: "🪄 Formatting files",
@@ -66,8 +88,8 @@ export async function createProject(options: Options) {
         },
       },
       {
-        title: `📡 Initializing Git repository${options.solidityFramework === SOLIDITY_FRAMEWORKS.FOUNDRY ? " and submodules" : ""}`,
-        task: (_, task) => createFirstGitCommit(targetDirectory, options, task),
+        title: "📡 Initializing Git repository",
+        task: (_, task) => createFirstGitCommit(targetDirectory, task),
       },
     ],
     { rendererOptions: { collapseSkips: false, suffixSkips: true } },
