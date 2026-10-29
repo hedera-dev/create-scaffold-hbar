@@ -33,6 +33,13 @@ export async function promptForMissingOptions(rawOptions: RawOptions): Promise<O
     return value;
   };
 
+  // Start the template-branch fetch before the first prompt so it overlaps with the
+  // user typing a project name, instead of stalling between that prompt and the menu.
+  // Gated so `--template`, `--yes` and `--ci` keep making no network calls at all.
+  // `fetchAvailableTemplates` never rejects (it falls back to the built-in registry),
+  // so this floating promise cannot raise an unhandled rejection.
+  const templateOptionsPromise = rawOptions.template == null && !acceptDefaults ? fetchAvailableTemplates() : undefined;
+
   const project =
     rawOptions.project ??
     (acceptDefaults
@@ -55,7 +62,7 @@ export async function promptForMissingOptions(rawOptions: RawOptions): Promise<O
     (acceptDefaults
       ? DEFAULT_OPTIONS.template
       : await (async () => {
-          const templateOptions = await fetchAvailableTemplates();
+          const templateOptions = await (templateOptionsPromise ?? fetchAvailableTemplates());
           const initialValue = templateOptions.some(t => t.value === DEFAULT_OPTIONS.template)
             ? DEFAULT_OPTIONS.template
             : templateOptions[0]?.value;

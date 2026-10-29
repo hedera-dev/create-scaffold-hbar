@@ -96,6 +96,46 @@ describe("promptForMissingOptions", () => {
     expect(result.template).toBe("payments-scheduler");
   });
 
+  // ── Template list prefetch ───────────────────────────────────────────────
+
+  it("starts the template fetch before the project prompt, so it overlaps typing", async () => {
+    const order: string[] = [];
+    mockFetchAvailableTemplates.mockImplementation(() => {
+      order.push("fetch");
+      return Promise.resolve([{ value: "blank", label: "Blank Starter" }]);
+    });
+    mockText.mockImplementation(() => {
+      order.push("project-prompt");
+      return Promise.resolve(DEFAULT_OPTIONS.project);
+    });
+
+    await promptForMissingOptions(makeRawOptions());
+
+    expect(order).toEqual(["fetch", "project-prompt"]);
+  });
+
+  it("fetches the template list exactly once", async () => {
+    await promptForMissingOptions(makeRawOptions());
+    expect(mockFetchAvailableTemplates).toHaveBeenCalledTimes(1);
+  });
+
+  it("makes no template-list request when a template is pre-supplied", async () => {
+    await promptForMissingOptions(makeRawOptions({ template: "payments-scheduler" }));
+    expect(mockFetchAvailableTemplates).not.toHaveBeenCalled();
+  });
+
+  it("makes no template-list request when defaults are accepted", async () => {
+    process.env.HBAR_ACCEPT_DEFAULTS = "1";
+    await promptForMissingOptions(makeRawOptions({ installHederaSkills: false }));
+    expect(mockFetchAvailableTemplates).not.toHaveBeenCalled();
+  });
+
+  it("makes no template-list request in CI mode", async () => {
+    process.env.HBAR_CI = "1";
+    await promptForMissingOptions(makeRawOptions({ installHederaSkills: false }));
+    expect(mockFetchAvailableTemplates).not.toHaveBeenCalled();
+  });
+
   it("skips frontend prompt when frontend is pre-supplied", async () => {
     const result = await promptForMissingOptions(makeRawOptions({ frontend: "nextjs-app" }));
     expect(result.frontend).toBe("nextjs-app");
