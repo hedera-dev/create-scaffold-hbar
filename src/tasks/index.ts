@@ -6,3 +6,4 @@ export * from "./install-packages";
 export * from "./install-hedera-skills";
 export * from "./create-first-git-commit";
 export * from "./prettier-format";
+export * from "./install-foundry-libraries";
