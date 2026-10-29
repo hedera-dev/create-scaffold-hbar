@@ -1,6 +1,6 @@
 {
   "name": "create-scaffold-hbar",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Scaffold a Hedera dApp project",
   "repository": {
     "type": "git",
@@ -8,9 +8,7 @@
   },
   "main": "dist/cli.js",
   "type": "module",
-  "bin": {
-    "create-scaffold-hbar": "bin/create-scaffold-hbar.js"
-  },
+  "bin": "bin/create-scaffold-hbar.js",
   "files": [
     "dist",
     "bin"
