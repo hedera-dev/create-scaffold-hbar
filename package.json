@@ -1,6 +1,6 @@
 {
-  "name": "create-scaffold-hbar",
-  "version": "0.5.0",
+  "name": "scaffold-hbar",
+  "version": "1.0.0",
   "description": "Scaffold a Hedera dApp project",
   "repository": {
     "type": "git",
@@ -8,7 +8,7 @@
   },
   "main": "dist/cli.js",
   "type": "module",
-  "bin": "bin/create-scaffold-hbar.js",
+  "bin": "bin/scaffold-hbar.js",
   "files": [
     "dist",
     "bin"
@@ -16,14 +16,16 @@
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit && node scripts/write-bin.js",
     "dev": "rollup -c rollup.config.js --watch",
-    "cli": "node bin/create-scaffold-hbar.js",
+    "cli": "node bin/scaffold-hbar.js",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "changeset:release": "yarn build && changeset publish"
+    "changeset:release": "yarn build && changeset publish",
+    "alias:sync": "node scripts/sync-alias-version.js",
+    "alias:publish": "yarn alias:sync && npm publish ./alias"
   },
   "keywords": [
     "cli",

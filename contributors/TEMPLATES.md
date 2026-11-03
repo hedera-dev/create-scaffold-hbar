@@ -1,6 +1,6 @@
 # Template flow (giget)
 
-The CLI uses **giget** to download the chosen template. There are **no embedded templates** in the create-scaffold-hbar repo and **no extension system**. Template content lives in the template repo as **branch names** (e.g. `templates/blank-template`, `templates/payments-scheduler`).
+The CLI uses **giget** to download the chosen template. There are **no embedded templates** in the scaffold-hbar repo and **no extension system**. Template content lives in the template repo as **branch names** (e.g. `templates/blank-template`, `templates/payments-scheduler`).
 
 ## Flow
 
@@ -20,15 +20,22 @@ When you ship a new `templates/<name>` branch:
 
 Until then, a successful live GitHub fetch can still surface the new branch in the menu, but capabilities will use permissive defaults until the registry entry exists.
 
+## `template.json` — the `scaffold-hbar` block
+
+The CLI reads its manifest block from the `scaffold-hbar` key. The former spellings
+`create-scaffold-hbar` and `create-hbar` are still accepted and normalized to it, so
+existing templates keep working untouched; new templates should use `scaffold-hbar`.
+A manifest carrying more than one spelling keeps the newest.
+
 ## `template.json` — custom outro
 
-Optional `create-scaffold-hbar.outro` replaces the default contract/frontend middle section of the CLI outro (after the shared header: congratulations, `cd`, optional install / Hedera Skills tips).
+Optional `scaffold-hbar.outro` replaces the default contract/frontend middle section of the CLI outro (after the shared header: congratulations, `cd`, optional install / Hedera Skills tips).
 
 ### Preferred: `outro.sections`
 
 ```json
 {
-  "create-scaffold-hbar": {
+  "scaffold-hbar": {
     "outro": {
       "sections": [
         {
@@ -96,7 +103,7 @@ Templates may ship a tracked **`.harness/`** directory (spec, PRD, validators, c
 }
 ```
 
-`create-scaffold-hbar` guarantees:
+`scaffold-hbar` guarantees:
 
 - Dot directories such as `.harness/` are copied into the project (same as other template files).
 - npm-mode yarn→npm text rewrite **does not** modify files under `.harness/`, so recipe validator commands (often `yarn …`) are not silently rewritten.
@@ -108,7 +115,7 @@ Outro tip for harness-enabled templates:
 
 ```json
 {
-  "create-scaffold-hbar": {
+  "scaffold-hbar": {
     "outro": {
       "sections": [
         {

@@ -164,16 +164,16 @@ function processTemplateManifest(
 
   const raw = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const manifest = TemplateManifestSchema.parse(raw);
-  const createScaffoldHbar = manifest["create-scaffold-hbar"];
+  const scaffoldHbar = manifest["scaffold-hbar"];
 
-  const outroSections = createScaffoldHbar?.outro ? resolveOutroSections(createScaffoldHbar.outro) : undefined;
-  const outroInstallCommand = createScaffoldHbar?.outro?.installCommand;
+  const outroSections = scaffoldHbar?.outro ? resolveOutroSections(scaffoldHbar.outro) : undefined;
+  const outroInstallCommand = scaffoldHbar?.outro?.installCommand;
 
-  if (createScaffoldHbar?.rename) {
-    applyRenameMap(projectDir, createScaffoldHbar.rename, projectName);
+  if (scaffoldHbar?.rename) {
+    applyRenameMap(projectDir, scaffoldHbar.rename, projectName);
   }
-  if (createScaffoldHbar?.envVars?.length) {
-    generateEnvExample(projectDir, createScaffoldHbar.envVars);
+  if (scaffoldHbar?.envVars?.length) {
+    generateEnvExample(projectDir, scaffoldHbar.envVars);
   }
 
   fs.unlinkSync(manifestPath);
@@ -481,7 +481,7 @@ function shouldCopyLocalTemplatePath(srcPath: string): boolean {
 /**
  * Copies a local template tree into `targetDir` the same way giget results are
  * copied (including dot directories like `.harness/`). Used by tests and the
- * CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR seam. Skips `.git`, deps, build output, and
+ * SCAFFOLD_HBAR_TEMPLATE_DIR seam. Skips `.git`, deps, build output, and
  * `.env` so a live checkout of scaffold-hbar does not poison the new project.
  */
 export async function copyLocalTemplateTree(sourceDir: string, targetDir: string): Promise<void> {
@@ -507,14 +507,19 @@ export async function copyTemplateFiles(
   targetDir: string,
 ): Promise<{ outroSections?: TemplateOutroSection[]; outroInstallCommand?: string }> {
   const spec = getTemplateSpec(options.template as string);
-  const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-scaffold-hbar-"));
-  /** Test/smoke seam: copy a local template tree instead of giget (unreleased recipe branches). */
-  const localTemplateDir = process.env.CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR?.trim();
+  const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "scaffold-hbar-"));
+  /**
+   * Test/smoke seam: copy a local template tree instead of giget (unreleased recipe branches).
+   * `CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR` is the pre-rename name, honoured for one release.
+   */
+  const localTemplateDir = (
+    process.env.SCAFFOLD_HBAR_TEMPLATE_DIR ?? process.env.CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR
+  )?.trim();
 
   try {
     if (localTemplateDir) {
       if (!fs.existsSync(localTemplateDir)) {
-        throw new Error(`CREATE_SCAFFOLD_HBAR_TEMPLATE_DIR does not exist: ${localTemplateDir}`);
+        throw new Error(`SCAFFOLD_HBAR_TEMPLATE_DIR does not exist: ${localTemplateDir}`);
       }
       await copyLocalTemplateTree(path.resolve(localTemplateDir), targetDir);
     } else {

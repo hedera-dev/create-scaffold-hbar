@@ -9,7 +9,7 @@ const fullManifest = {
   name: "payments-scheduler",
   description: "NFT Collection template using Hedera Token Service",
   version: "1.0.0",
-  "create-scaffold-hbar": {
+  "scaffold-hbar": {
     rename: {
       HtsNftTemplate: {
         to: "{{projectName}}",
@@ -48,41 +48,75 @@ describe("TemplateManifestSchema", () => {
     it("accepts a create-scaffold-hbar block with only envVars", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "blank",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           envVars: [{ key: "HEDERA_ACCOUNT_ID", description: "Account ID" }],
         },
       });
       expect(result.success).toBe(true);
     });
 
-    it("maps legacy create-hbar manifest key to create-scaffold-hbar", () => {
+    it.each(["create-scaffold-hbar", "create-hbar"])("maps legacy %s manifest key to scaffold-hbar", legacyKey => {
       const result = TemplateManifestSchema.safeParse({
         name: "blank",
-        "create-hbar": {
+        [legacyKey]: {
           envVars: [{ key: "HEDERA_ACCOUNT_ID", description: "Account ID" }],
         },
       });
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data["create-scaffold-hbar"]?.envVars).toHaveLength(1);
+      expect(result.data["scaffold-hbar"]?.envVars).toHaveLength(1);
+    });
+
+    it("prefers the canonical scaffold-hbar key over legacy spellings", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "blank",
+        "scaffold-hbar": { envVars: [{ key: "CANONICAL", description: "new key" }] },
+        "create-scaffold-hbar": { envVars: [{ key: "LEGACY", description: "old key" }] },
+        "create-hbar": { envVars: [{ key: "OLDEST", description: "oldest key" }] },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data["scaffold-hbar"]?.envVars?.[0].key).toBe("CANONICAL");
+    });
+
+    it("keeps the newest legacy spelling when a manifest carries several", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "blank",
+        "create-hbar": { envVars: [{ key: "OLDEST", description: "oldest key" }] },
+        "create-scaffold-hbar": { envVars: [{ key: "LEGACY", description: "old key" }] },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data["scaffold-hbar"]?.envVars?.[0].key).toBe("LEGACY");
+    });
+
+    it("drops legacy keys from the parsed manifest", () => {
+      const result = TemplateManifestSchema.safeParse({
+        name: "blank",
+        "create-scaffold-hbar": { envVars: [{ key: "LEGACY", description: "old key" }] },
+      });
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).not.toHaveProperty("create-scaffold-hbar");
+      expect(result.data).not.toHaveProperty("create-hbar");
     });
 
     it("accepts outro.steps for a custom CLI outro body", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "hedera-demo",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: { steps: ["+Start the frontend: {run:next:start}"] },
         },
       });
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data["create-scaffold-hbar"]?.outro?.steps).toEqual(["+Start the frontend: {run:next:start}"]);
+      expect(result.data["scaffold-hbar"]?.outro?.steps).toEqual(["+Start the frontend: {run:next:start}"]);
     });
 
     it("accepts outro.sections for a structured CLI outro body", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "bridge",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: {
             sections: [
               {
@@ -99,14 +133,14 @@ describe("TemplateManifestSchema", () => {
       });
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data["create-scaffold-hbar"]?.outro?.sections?.[0].title).toBe("Next steps");
-      expect(result.data["create-scaffold-hbar"]?.outro?.sections?.[0].steps).toHaveLength(3);
+      expect(result.data["scaffold-hbar"]?.outro?.sections?.[0].title).toBe("Next steps");
+      expect(result.data["scaffold-hbar"]?.outro?.sections?.[0].steps).toHaveLength(3);
     });
 
     it("accepts outro with both sections and legacy steps (sections preferred at runtime)", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "bridge",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: {
             sections: [{ steps: [{ command: "yarn next:dev" }] }],
             steps: ["+legacy"],
@@ -119,20 +153,20 @@ describe("TemplateManifestSchema", () => {
     it("accepts outro.installCommand without steps (install hint only)", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "pnpm-template",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: { installCommand: "pnpm install" },
         },
       });
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data["create-scaffold-hbar"]?.outro?.steps).toBeUndefined();
-      expect(result.data["create-scaffold-hbar"]?.outro?.installCommand).toBe("pnpm install");
+      expect(result.data["scaffold-hbar"]?.outro?.steps).toBeUndefined();
+      expect(result.data["scaffold-hbar"]?.outro?.installCommand).toBe("pnpm install");
     });
 
     it("rejects an outro step with no payload fields", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: { sections: [{ steps: [{}] }] },
         },
       });
@@ -143,7 +177,7 @@ describe("TemplateManifestSchema", () => {
       const result = TemplateManifestSchema.safeParse(fullManifest);
       expect(result.success).toBe(true);
       if (!result.success) return;
-      const renameEntry = result.data["create-scaffold-hbar"]?.rename?.["HtsNftTemplate"];
+      const renameEntry = result.data["scaffold-hbar"]?.rename?.["HtsNftTemplate"];
       expect(renameEntry?.to).toBe("{{projectName}}");
       expect(renameEntry?.paths).toEqual(["contracts", "frontend/src"]);
     });
@@ -163,7 +197,7 @@ describe("TemplateManifestSchema", () => {
     it("rejects an envVar entry missing a key", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           envVars: [{ description: "missing key field" }],
         },
       });
@@ -173,7 +207,7 @@ describe("TemplateManifestSchema", () => {
     it("rejects an envVar entry with an empty key", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           envVars: [{ key: "", description: "empty key" }],
         },
       });
@@ -183,7 +217,7 @@ describe("TemplateManifestSchema", () => {
     it("rejects a rename entry with an empty paths array", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           rename: {
             Placeholder: { to: "{{projectName}}", paths: [] },
           },
@@ -195,7 +229,7 @@ describe("TemplateManifestSchema", () => {
     it("rejects a rename entry with an empty 'to' string", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           rename: {
             Placeholder: { to: "", paths: ["contracts"] },
           },
@@ -207,7 +241,7 @@ describe("TemplateManifestSchema", () => {
     it("rejects an outro block with neither sections, steps, nor installCommand", () => {
       const result = TemplateManifestSchema.safeParse({
         name: "test",
-        "create-scaffold-hbar": {
+        "scaffold-hbar": {
           outro: {},
         },
       });
@@ -220,7 +254,7 @@ describe("TemplateManifestSchema", () => {
       const result = TemplateManifestSchema.safeParse(fullManifest);
       expect(result.success).toBe(true);
       if (!result.success) return;
-      const envVars = result.data["create-scaffold-hbar"]?.envVars ?? [];
+      const envVars = result.data["scaffold-hbar"]?.envVars ?? [];
       expect(envVars[0].key).toBe("HEDERA_ACCOUNT_ID");
       expect(envVars[1].key).toBe("HEDERA_PRIVATE_KEY");
       expect(envVars[2].key).toBe("HEDERA_NETWORK");
@@ -230,7 +264,7 @@ describe("TemplateManifestSchema", () => {
       const result = TemplateManifestSchema.safeParse(fullManifest);
       expect(result.success).toBe(true);
       if (!result.success) return;
-      const instructions = result.data["create-scaffold-hbar"]?.instructions ?? [];
+      const instructions = result.data["scaffold-hbar"]?.instructions ?? [];
       expect(instructions).toHaveLength(3);
       expect(instructions[0]).toBe("Get free testnet HBAR at: https://portal.hedera.com");
     });

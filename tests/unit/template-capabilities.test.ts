@@ -11,7 +11,7 @@ describe("resolveTemplateCapabilities", () => {
   it("loads capabilities from template.json for owner/repo#ref", async () => {
     const manifestJson = {
       name: "demo",
-      "create-scaffold-hbar": {
+      "scaffold-hbar": {
         capabilities: {
           frontend: ["nextjs-app"],
           solidityFramework: ["none"],

@@ -1,18 +1,18 @@
-# Welcome to create-scaffold-hbar Contributing Guide
+# Welcome to scaffold-hbar Contributing Guide
 
-Thank you for investing your time in contributing to create-scaffold-hbar!
+Thank you for investing your time in contributing to scaffold-hbar!
 
 This guide aims to provide an overview of the contribution workflow to help us make the contribution process effective for everyone involved.
 
 ## About the Project
 
-create-scaffold-hbar is a CLI tool to create a minimal repo to build decentralized applications on Hedera, providing builders with a starter kit based on Scaffold-HBAR.
+scaffold-hbar is a CLI tool to create a minimal repo to build decentralized applications on Hedera, providing builders with a starter kit based on Scaffold-HBAR.
 
 Read the [README](README.md) to get an overview of the project.
 
 ### Vision
 
-The goal of create-scaffold-hbar is to be a "toolkit creator", using Scaffold-HBAR as a base to provide the primary building blocks for a decentralized application. We also support the possibility to import 3rd party packages (that follow our standard).
+The goal of scaffold-hbar is to be a "toolkit creator", using Scaffold-HBAR as a base to provide the primary building blocks for a decentralized application. We also support the possibility to import 3rd party packages (that follow our standard).
 
 The repo can be forked to include integrations and more features, but we want to keep the `main` branch simple and minimal.
 
@@ -104,11 +104,26 @@ Each changeset defines the version should be a major/minor/patch release, as wel
 
 To create a new changeset, run `yarn changeset add`. This will run the Changesets CLI, prompting you for details about the change. You’ll be able to edit the file after it’s created — don’t worry about getting everything perfect up front.
 
-Since we’re currently in beta, all changes should be marked as a minor/patch release to keep us within the `v0.x` range.
+The package is published as `scaffold-hbar`. Version `1.0.0` was taken by a placeholder publish before the rename, so released versions start above it.
 
 Even though you can technically use any markdown formatting you like, headings should be avoided since each changeset will ultimately be nested within a bullet list. Instead, bold text should be used as section headings.
 
 If your PR is making changes to an area that already has a changeset (e.g. there’s an existing changeset covering theme API changes but you’re making further changes to the same API), you should update the existing changeset in your PR rather than creating a new one.
+
+### Publishing the `create-scaffold-hbar` alias
+
+`npm create scaffold-hbar` resolves to `create-scaffold-hbar`, so that name is still
+published as a thin alias of this package (see `alias/`). It has to be published
+**after** the main package, because it pins an exact dependency on the version that
+release just put on the registry:
+
+```bash
+yarn changeset:release   # publishes scaffold-hbar
+yarn alias:publish       # syncs alias/ to the new version, then publishes it
+```
+
+Skipping the second step is not fatal — `npm create scaffold-hbar` keeps working, but
+serves the previous release until the alias catches up.
 
 ## Developer Guide
 
