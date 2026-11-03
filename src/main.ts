@@ -52,7 +52,7 @@ export async function createProject(options: Options) {
                 task: (_, subtask) => installPackages(targetDirectory, subtask, options.packageManager),
                 skip: () => {
                   if (options.packageManager === "none") {
-                    return "Skipped — this template manages dependency installation outside create-scaffold-hbar";
+                    return "Skipped — this template manages dependency installation outside scaffold-hbar";
                   }
                   if (!options.install) {
                     return "Manually skipped, since `--skip-install` flag was passed";

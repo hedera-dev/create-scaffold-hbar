@@ -1,0 +1,20 @@
+{
+  "name": "create-scaffold-hbar",
+  "version": "1.0.0",
+  "description": "Alias for scaffold-hbar, kept so `npm create scaffold-hbar` keeps working. Prefer `npx scaffold-hbar@latest`.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hedera-dev/create-scaffold-hbar.git"
+  },
+  "type": "module",
+  "bin": {
+    "create-scaffold-hbar": "bin.js"
+  },
+  "files": [
+    "bin.js"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "scaffold-hbar": "1.0.0"
+  }
+}

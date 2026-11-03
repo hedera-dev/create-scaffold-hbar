@@ -23,8 +23,8 @@ const DEFAULT_CAPABILITIES: TemplateCapabilities = {
 };
 
 function fromManifest(manifest: TemplateManifest): TemplateCapabilities | null {
-  const capabilities = manifest["create-scaffold-hbar"]?.capabilities;
-  const defaults = manifest["create-scaffold-hbar"]?.defaults;
+  const capabilities = manifest["scaffold-hbar"]?.capabilities;
+  const defaults = manifest["scaffold-hbar"]?.defaults;
   if (!capabilities && !defaults) return null;
 
   return {

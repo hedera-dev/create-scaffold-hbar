@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-/** Environment variable entry from template manifest (create-scaffold-hbar.envVars). */
+/** Environment variable entry from template manifest (scaffold-hbar.envVars). */
 export type EnvVarEntry = {
   key: string;
   description: string;

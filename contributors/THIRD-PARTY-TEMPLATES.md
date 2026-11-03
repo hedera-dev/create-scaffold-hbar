@@ -1,8 +1,8 @@
 ## Introduction
 
-Welcome to the guide for developing third-party templates for `create-scaffold-hbar`.
+Welcome to the guide for developing third-party templates for `scaffold-hbar`.
 
-`create-scaffold-hbar` supports:
+`scaffold-hbar` supports:
 
 - Built-in templates (for example: `blank`, `payments-scheduler`)
 - Community templates from GitHub using `owner/repo` (optionally with `#branch`)
@@ -10,18 +10,18 @@ Welcome to the guide for developing third-party templates for `create-scaffold-h
 Use your template repository via:
 
 ```bash
-npx create-scaffold-hbar@latest --template {github-owner}/{template-repo}
+npx scaffold-hbar@latest --template {github-owner}/{template-repo}
 ```
 
 Or with an explicit branch:
 
 ```bash
-npx create-scaffold-hbar@latest --template {github-owner}/{template-repo}#{branch}
+npx scaffold-hbar@latest --template {github-owner}/{template-repo}#{branch}
 ```
 
 ## Supported Template Workflows
 
-`create-scaffold-hbar` supports template modules (`-t`) or template registries.
+`scaffold-hbar` supports template modules (`-t`) or template registries.
 
 Use one of these two workflows:
 
@@ -31,7 +31,7 @@ Use one of these two workflows:
    - Publish and version your template branches
 
 2. **Scaffold-then-curate workflow:**
-   - Run `create-scaffold-hbar` to generate a new project
+   - Run `scaffold-hbar` to generate a new project
    - Customize that generated project
    - Extract/commit the resulting template-ready structure into your own repo
    - Publish and reference it via `--template owner/repo[#branch]`
@@ -67,14 +67,14 @@ your-template-repo/
 5. Test with:
 
 ```bash
-npx create-scaffold-hbar@latest --template {github-owner}/{template-repo}
+npx scaffold-hbar@latest --template {github-owner}/{template-repo}
 ```
 
 ## Local Testing Workflow
 
 To iterate quickly while authoring templates:
 
-1. Clone `create-scaffold-hbar` locally.
+1. Clone `scaffold-hbar` locally.
 2. Run:
 
 ```bash
@@ -97,7 +97,7 @@ yarn cli --template {github-owner}/{template-repo}
 - When sharing usage examples, prefer explicit commands, for example:
 
 ```bash
-npx create-scaffold-hbar@latest --template {github-owner}/{template-repo}#{branch}
+npx scaffold-hbar@latest --template {github-owner}/{template-repo}#{branch}
 ```
 
 ## Notes
