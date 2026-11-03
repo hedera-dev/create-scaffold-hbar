@@ -61,7 +61,7 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
   let targetDir: string;
 
   beforeEach(async () => {
-    targetDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-hbar-harness-"));
+    targetDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "scaffold-hbar-harness-"));
     await copyLocalTemplateTree(FIXTURE_TEMPLATE, targetDir);
   });
 
@@ -76,8 +76,8 @@ describe("copy + package-manager transforms preserve harness recipes", () => {
   });
 
   it("skips .git, node_modules, .next, and .env from a live template checkout", async () => {
-    const dirty = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-hbar-dirty-"));
-    const out = await fs.promises.mkdtemp(path.join(os.tmpdir(), "create-hbar-out-"));
+    const dirty = await fs.promises.mkdtemp(path.join(os.tmpdir(), "scaffold-hbar-dirty-"));
+    const out = await fs.promises.mkdtemp(path.join(os.tmpdir(), "scaffold-hbar-out-"));
     try {
       fs.mkdirSync(path.join(dirty, ".git"));
       fs.writeFileSync(path.join(dirty, ".git", "HEAD"), "ref: refs/heads/main\n");

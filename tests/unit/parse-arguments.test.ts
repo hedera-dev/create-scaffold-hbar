@@ -19,7 +19,7 @@ vi.mock("@clack/prompts", () => ({
 const { parseArgumentsIntoOptions } = await import("../../src/utils/parse-arguments-into-options");
 
 /** Wraps raw string args the same way process.argv works (node + script prefix). */
-const args = (...flags: string[]) => ["node", "create-scaffold-hbar", ...flags];
+const args = (...flags: string[]) => ["node", "scaffold-hbar", ...flags];
 
 /** Captures process.exit calls without actually exiting. */
 function mockProcessExit() {

@@ -9,7 +9,7 @@ import { SOLIDITY_FRAMEWORKS, EXIT_CODES } from "./utils/consts";
 import { validateFoundry, checkCoreSystemRequirements, checkPackageManagerToolchain } from "./utils/system-validation";
 
 function printRequirementsErrors(errors: string[]) {
-  console.log(chalk.red("\n❌ create-scaffold-hbar requirements not met:"));
+  console.log(chalk.red("\n❌ scaffold-hbar requirements not met:"));
   errors.forEach(error => console.log(chalk.red(`  - ${error}`)));
 }
 

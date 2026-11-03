@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Writes bin/create-scaffold-hbar.js so the CLI can be run via the bin entry.
+ * Writes bin/scaffold-hbar.js so the CLI can be run via the bin entry.
  * Run after rollup build (dist/cli.js must exist).
  */
 import fs from "fs";
@@ -16,7 +16,7 @@ cli(process.argv);
 `;
 
 const binDir = path.join(__dirname, "..", "bin");
-const binPath = path.join(binDir, "create-scaffold-hbar.js");
+const binPath = path.join(binDir, "scaffold-hbar.js");
 
 fs.mkdirSync(binDir, { recursive: true });
 fs.writeFileSync(binPath, content, "utf8");

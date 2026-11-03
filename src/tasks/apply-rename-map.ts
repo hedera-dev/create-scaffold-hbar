@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { findFilesRecursiveSync } from "../utils/find-files-recursively";
 
-/** Rename entry shape from template manifest (create-scaffold-hbar.rename). */
+/** Rename entry shape from template manifest (scaffold-hbar.rename). */
 export type RenameEntry = {
   to: string;
   paths: string[];
