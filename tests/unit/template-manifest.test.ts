@@ -123,13 +123,13 @@ describe("template manifest integration", () => {
 
       const raw = JSON.parse(fs.readFileSync(path.join(projectDir, "template.json"), "utf8"));
       const manifest = TemplateManifestSchema.parse(raw);
-      const createScaffoldHbar = manifest["scaffold-hbar"];
+      const scaffoldHbar = manifest["scaffold-hbar"];
 
-      if (createScaffoldHbar?.rename) {
-        applyRenameMap(projectDir, createScaffoldHbar.rename, "my-hedera-dapp");
+      if (scaffoldHbar?.rename) {
+        applyRenameMap(projectDir, scaffoldHbar.rename, "my-hedera-dapp");
       }
-      if (createScaffoldHbar?.envVars?.length) {
-        generateEnvExample(projectDir, createScaffoldHbar.envVars);
+      if (scaffoldHbar?.envVars?.length) {
+        generateEnvExample(projectDir, scaffoldHbar.envVars);
       }
 
       expect(fs.readFileSync(path.join(projectDir, "contracts", "Token.ts"), "utf8")).toBe(

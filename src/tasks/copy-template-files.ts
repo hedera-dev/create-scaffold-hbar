@@ -164,16 +164,16 @@ function processTemplateManifest(
 
   const raw = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   const manifest = TemplateManifestSchema.parse(raw);
-  const createScaffoldHbar = manifest["scaffold-hbar"];
+  const scaffoldHbar = manifest["scaffold-hbar"];
 
-  const outroSections = createScaffoldHbar?.outro ? resolveOutroSections(createScaffoldHbar.outro) : undefined;
-  const outroInstallCommand = createScaffoldHbar?.outro?.installCommand;
+  const outroSections = scaffoldHbar?.outro ? resolveOutroSections(scaffoldHbar.outro) : undefined;
+  const outroInstallCommand = scaffoldHbar?.outro?.installCommand;
 
-  if (createScaffoldHbar?.rename) {
-    applyRenameMap(projectDir, createScaffoldHbar.rename, projectName);
+  if (scaffoldHbar?.rename) {
+    applyRenameMap(projectDir, scaffoldHbar.rename, projectName);
   }
-  if (createScaffoldHbar?.envVars?.length) {
-    generateEnvExample(projectDir, createScaffoldHbar.envVars);
+  if (scaffoldHbar?.envVars?.length) {
+    generateEnvExample(projectDir, scaffoldHbar.envVars);
   }
 
   fs.unlinkSync(manifestPath);
