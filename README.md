@@ -23,8 +23,9 @@ create-scaffold-hbar is an interactive CLI (like `create-next-app` or `create-re
   [nodejs.org](https://nodejs.org/)
 - **Git** (with `user.name` and `user.email` configured)  
   [git-scm.com](https://git-scm.com/)
-- **Yarn** (the scaffolded projects use Yarn workspaces; npm and pnpm are not supported)  
-  Install via Corepack: `corepack enable && corepack prepare yarn@stable --activate`
+- **Yarn or npm** — Yarn is the default and recommended; npm is fully supported  
+  (the CLI converts the project to npm workspaces).  
+  Install Yarn via Corepack: `corepack enable && corepack prepare yarn@stable --activate`
 
 If you choose **Foundry** as the Solidity framework, Foundry is **installed automatically**
 when `forge` is missing (or older than 1.4.0), using the official installer plus `foundryup`.
