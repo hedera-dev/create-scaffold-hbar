@@ -8,7 +8,7 @@ create-scaffold-hbar is an interactive CLI (like `create-next-app` or `create-re
 
 ## Features
 
-- **Starter templates** — Blank, HTS fungible, HTS NFT, HCS DAO, or DeFi swap (template = branch name; list from GitHub API with fallback)
+- **Starter templates** — Blank Starter, Bridge, Cross-Chain DCA, Hedera Native, Oracles, Onchain Cron Job, Tokenize Subscriptions, or x402 Pay-Per-Use (template = branch name; list from GitHub API with fallback)
 - **Frontend** — Next.js (App Router)
 - **Solidity** — Hardhat or Foundry (or none)
 - **Networks** — Testnet or Mainnet (Hashio RPC + Mirror Node URLs)
@@ -65,25 +65,27 @@ dependency and arrives with your dependency install.
 Create a new Hedera dApp without cloning this repo:
 
 ```bash
-npx create-scaffold-hbar@latest
+npm create scaffold-hbar@latest
 ```
 
-You’ll get interactive prompts for project name, template, frontend, framework, and network. Yarn is used automatically as the package manager. To accept all defaults and skip prompts:
+`npx create-scaffold-hbar@latest` is equivalent and needs no `--` before flags.
+
+You’ll get interactive prompts for project name, template, Hedera Skills, frontend, Solidity framework, network, package manager, and whether to install dependencies. A prompt is skipped when the chosen template allows only one answer — every built-in template pins the frontend to Next.js, and Hedera Native is Yarn-only, so neither of those is asked. Otherwise the package manager is preselected from the one the CLI detects in your environment. To accept all defaults and skip prompts (Yarn, unless the template overrides it):
 
 ```bash
-npx create-scaffold-hbar@latest --yes
+npm create scaffold-hbar@latest -- --yes
 ```
 
 To skip installing dependencies (e.g. to install yourself later):
 
 ```bash
-npx create-scaffold-hbar@latest --yes --skip-install
+npm create scaffold-hbar@latest -- --yes --skip-install
 ```
 
 With `--yes` or `--ci`, Hedera Skills are **installed by default** (same non-interactive `npx skills add hedera-dev/hedera-skills --all` step). To skip them:
 
 ```bash
-npx create-scaffold-hbar@latest --yes --skip-hedera-skills
+npm create scaffold-hbar@latest -- --yes --skip-hedera-skills
 ```
 
 ---
@@ -160,6 +162,7 @@ node /path/to/create-scaffold-hbar/bin/create-scaffold-hbar.js --yes --skip-inst
 | `-f, --frontend <fw>`           | `nextjs-app` \| `none` (contracts only)                                                              |
 | `-s, --solidity-framework <fw>` | `foundry` \| `hardhat` \| `none`                                                                     |
 | `--network <network>`           | `testnet` \| `mainnet`                                                                               |
+| `--package-manager <pm>`        | `yarn` \| `npm` \| `none` (template-managed, skips install)                                          |
 | `--skip-install`                | Don’t run install after scaffolding                                                                  |
 | `--install-hedera-skills`       | Install Hedera Skills (`npx skills add … --all`); default with `--yes` unless `--skip-hedera-skills` |
 | `--skip-hedera-skills`          | Do not install Hedera Skills (cannot combine with `--install-hedera-skills`)                         |
@@ -167,6 +170,7 @@ node /path/to/create-scaffold-hbar/bin/create-scaffold-hbar.js --yes --skip-inst
 | `--ci`                          | CI mode (implies `--yes`, structured output)                                                         |
 | `-h, --help`                    | Show help                                                                                            |
 | `-v, --version`                 | Show version                                                                                         |
+| `--log-level <level>`           | Log verbosity: `error` \| `warn` \| `info` (default) \| `verbose` \| `debug`                         |
 
 ---
 
