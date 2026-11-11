@@ -28,6 +28,19 @@ You can view the open Issues, follow the development process, and contribute to 
 2. Contributors must be humans, not bots.
 3. First-time contributions must not contain only spelling or grammatical fixes.
 
+## Where to contribute
+
+This repo holds the **CLI only**. Templates live in their own repo and are not embedded
+here, so:
+
+- **Changing or adding a template** → [`hedera-dev/scaffold-hbar`](https://github.com/hedera-dev/scaffold-hbar).
+  Each template is a branch, e.g. `templates/blank-template`. See
+  [`contributors/TEMPLATES.md`](contributors/TEMPLATES.md).
+- **Publishing your own template** → no PR needed here. Any GitHub repo works as
+  `--template owner/repo`; see
+  [`contributors/THIRD-PARTY-TEMPLATES.md`](contributors/THIRD-PARTY-TEMPLATES.md).
+- **Changing the CLI itself** → this repo, following the rest of this guide.
+
 ## Getting started
 
 You can contribute to this repo in many ways:
@@ -112,4 +125,4 @@ If your PR is making changes to an area that already has a changeset (e.g. there
 
 ## Developer Guide
 
-You can find a detailed guide on `[contributors/DEVELOPER-GUIDE.md](contributors/DEVELOPER-GUIDE.md)`
+You can find a detailed guide in [`contributors/DEVELOPER-GUIDE.md`](contributors/DEVELOPER-GUIDE.md).
