@@ -19,8 +19,9 @@ create-scaffold-hbar is an interactive CLI (like `create-next-app` or `create-re
 
 ## Prerequisites
 
-- **Node.js** ≥ 20.18.3  
-  [nodejs.org](https://nodejs.org/)
+- **Node.js** ≥ 22.23.4 (the 22.x line)  
+  [nodejs.org](https://nodejs.org/) — Node 20 has no vendor fix for the 2026-10-21 runtime
+  advisories, and the templates target 22.x, so they pin `>=22.23.4 <23`.
 - **Git** (with `user.name` and `user.email` configured)  
   [git-scm.com](https://git-scm.com/)
 - **Yarn or npm** — Yarn is the default and recommended; npm is fully supported  
