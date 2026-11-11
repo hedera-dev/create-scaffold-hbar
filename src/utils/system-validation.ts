@@ -7,6 +7,14 @@ import type { PackageManager } from "../types";
 
 const REQUIRED_FOUNDRY_VERSION = "1.4.0";
 const REQUIRED_NPM_VERSION = "8.0.0"; // npm workspaces support
+/**
+ * Node 20 received no vendor fix for the 2026-10-21 runtime advisories, and Hardhat
+ * 2.22.19 only claims support for 22.x, so every template pins `>=22.23.4 <23`. A
+ * template's `engines` range is documentation only (Yarn 3 enforces neither it nor a
+ * root preinstall script), so this check is the only thing that keeps a scaffold off an
+ * unpatched runtime.
+ */
+const REQUIRED_NODE_VERSION = "22.23.4";
 
 /** Where the official installer puts `foundryup`, `forge`, `cast` and `anvil`. */
 const FOUNDRY_BIN_DIR = path.join(os.homedir(), ".foundry", "bin");
@@ -145,11 +153,11 @@ export const checkCoreSystemRequirements = async (): Promise<{ errors: string[] 
   try {
     const { stdout: nodeVersion } = await execa("node", ["--version"]);
     const cleanNodeVersion = nodeVersion.replace("v", "");
-    if (semver.lt(cleanNodeVersion, "20.18.3")) {
-      errors.push(`Node.js version must be >= 20.18.3. Current version: ${nodeVersion}`);
+    if (semver.lt(cleanNodeVersion, REQUIRED_NODE_VERSION)) {
+      errors.push(`Node.js version must be >= ${REQUIRED_NODE_VERSION}. Current version: ${nodeVersion}`);
     }
   } catch {
-    errors.push("Node.js is not installed. Please install Node.js >= 20.18.3");
+    errors.push(`Node.js is not installed. Please install Node.js >= ${REQUIRED_NODE_VERSION}`);
   }
 
   try {
