@@ -71,7 +71,9 @@ npm create scaffold-hbar@latest
 
 `npx create-scaffold-hbar@latest` is equivalent and needs no `--` before flags.
 
-You’ll get interactive prompts for project name, template, Hedera Skills, frontend, Solidity framework, network, package manager, and whether to install dependencies. A prompt is skipped when the chosen template allows only one answer — every built-in template pins the frontend to Next.js, and Hedera Native is Yarn-only, so neither of those is asked. Otherwise the package manager is preselected from the one the CLI detects in your environment. To accept all defaults and skip prompts (Yarn, unless the template overrides it):
+You’ll get interactive prompts for all projects' options. A prompt is skipped when the chosen template allows only one answer.
+
+To accept all defaults and skip prompts (Yarn, unless the template overrides it):
 
 ```bash
 npm create scaffold-hbar@latest -- --yes
@@ -87,68 +89,6 @@ With `--yes` or `--ci`, Hedera Skills are **installed by default** (same non-int
 
 ```bash
 npm create scaffold-hbar@latest -- --yes --skip-hedera-skills
-```
-
----
-
-## Running locally (development)
-
-Use this when you’re working on the create-scaffold-hbar CLI itself.
-
-### 1. Clone and install
-
-```bash
-git clone https://github.com/hedera-dev/create-scaffold-hbar.git
-cd create-scaffold-hbar
-yarn install
-```
-
-### 2. Build
-
-The CLI runs from compiled output in `dist/`:
-
-```bash
-yarn build
-```
-
-### 3. Run the CLI
-
-From the repo root:
-
-```bash
-node bin/create-scaffold-hbar.js [project-name] [options]
-```
-
-Or use the `cli` script:
-
-```bash
-yarn cli
-```
-
-**Examples (run from repo root):**
-
-```bash
-# Interactive: prompts for everything
-node bin/create-scaffold-hbar.js --skip-install
-
-# Non-interactive: default project name, no install, no Foundry check
-node bin/create-scaffold-hbar.js --yes --skip-install --solidity-framework none
-
-# Non-interactive with Hardhat
-node bin/create-scaffold-hbar.js --yes --skip-install --solidity-framework hardhat
-
-# Custom project name and template
-node bin/create-scaffold-hbar.js my-hts-app --template payments-scheduler --frontend nextjs-app --skip-install
-
-# See all options
-node bin/create-scaffold-hbar.js --help
-```
-
-To avoid creating the project inside the repo, run from another directory:
-
-```bash
-cd /tmp
-node /path/to/create-scaffold-hbar/bin/create-scaffold-hbar.js --yes --skip-install my-hedera-dapp
 ```
 
 ---
@@ -172,36 +112,6 @@ node /path/to/create-scaffold-hbar/bin/create-scaffold-hbar.js --yes --skip-inst
 | `-h, --help`                    | Show help                                                                                            |
 | `-v, --version`                 | Show version                                                                                         |
 | `--log-level <level>`           | Log verbosity: `error` \| `warn` \| `info` (default) \| `verbose` \| `debug`                         |
-
----
-
-## Development (contributing)
-
-- **Typecheck:** `yarn type-check`
-- **Lint:** `yarn lint`
-- **Format:** `yarn format`
-- **Tests:** `yarn test`
-- **Tests (watch):** `yarn test:watch`
-- **Coverage:** `yarn test:coverage`
-
-Pre-commit hooks (lefthook) run format, type-check, and lint.
-
----
-
-## E2E scenarios (manual check)
-
-From the repo root after `yarn build`, you can run:
-
-| Scenario        | Command                                                                                                               | What to check                         |
-| --------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Help            | `node bin/create-scaffold-hbar.js --help`                                                                             | All options listed                    |
-| Default         | `node bin/create-scaffold-hbar.js e2e-scenarios/default --yes --skip-install`                                         | Scaffold + skip install               |
-| Solidity none   | `node bin/create-scaffold-hbar.js e2e-scenarios/sol-none --yes --skip-install -s none`                                | No "and submodules"                   |
-| Hardhat         | `node bin/create-scaffold-hbar.js e2e-scenarios/sol-hardhat --yes --skip-install -s hardhat`                          | `packages/hardhat` + `nextjs`         |
-| Custom flags    | `node bin/create-scaffold-hbar.js e2e-scenarios/custom --yes --skip-install -t blank -f nextjs-app --network mainnet` | Scaffold with defaults                |
-| Install failure | `node bin/create-scaffold-hbar.js e2e-scenarios/with-install --yes -s hardhat`                                        | Exit code **5**, InstallError message |
-
-Output goes under `e2e-scenarios/` (gitignored).
 
 ---
 
