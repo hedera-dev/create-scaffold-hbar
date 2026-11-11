@@ -1,5 +1,5 @@
 ---
-"create-scaffold-hbar": minor
+"scaffold-hbar": minor
 ---
 
 Raise the Node.js requirement to >= 22.23.4.
