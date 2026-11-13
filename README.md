@@ -1,8 +1,8 @@
-# create-scaffold-hbar
+# scaffold-hbar
 
 **Scaffold Hedera dApp projects from the command line.** Pick a template, frontend, and Solidity framework—then get a runnable project in one step.
 
-create-scaffold-hbar is an interactive CLI (like `create-next-app` or `create-react-app`) for the [Hedera](https://hedera.com) ecosystem. It fetches a **template from a Git branch** (via [giget](https://github.com/unjs/giget)), then generates a monorepo with contracts (Hardhat or Foundry), frontend (Next.js), and Hedera network configuration. There are **no embedded templates** in the CLI repo and **no extension system**—templates are branches in the template repo (e.g. `templates/blank-template`).
+scaffold-hbar is an interactive CLI (like `create-next-app` or `create-react-app`) for the [Hedera](https://hedera.com) ecosystem. It fetches a **template from a Git branch** (via [giget](https://github.com/unjs/giget)), then generates a monorepo with contracts (Hardhat or Foundry), frontend (Next.js), and Hedera network configuration. There are **no embedded templates** in the CLI repo and **no extension system**—templates are branches in the template repo (e.g. `templates/blank-template`).
 
 ---
 
@@ -78,29 +78,32 @@ dependency and arrives with your dependency install.
 Create a new Hedera dApp without cloning this repo:
 
 ```bash
-npm create scaffold-hbar@latest
+npx scaffold-hbar@latest
 ```
 
-`npx create-scaffold-hbar@latest` is equivalent and needs no `--` before flags.
+`npm create scaffold-hbar@latest` runs the same CLI — `npm create <x>` resolves to
+`create-<x>`, and [`create-scaffold-hbar`](https://www.npmjs.com/package/create-scaffold-hbar)
+stays published as a thin alias for exactly that reason. Prefer `npx`: it needs no `--`
+before flags.
 
 You’ll get interactive prompts for all projects' options. A prompt is skipped when the chosen template allows only one answer.
 
 To accept all defaults and skip prompts (Yarn, unless the template overrides it):
 
 ```bash
-npm create scaffold-hbar@latest -- --yes
+npx scaffold-hbar@latest --yes
 ```
 
 To skip installing dependencies (e.g. to install yourself later):
 
 ```bash
-npm create scaffold-hbar@latest -- --yes --skip-install
+npx scaffold-hbar@latest --yes --skip-install
 ```
 
 With `--yes` or `--ci`, Hedera Skills are **installed by default** (same non-interactive `npx skills add hedera-dev/hedera-skills --all` step). To skip them:
 
 ```bash
-npm create scaffold-hbar@latest -- --yes --skip-hedera-skills
+npx scaffold-hbar@latest --yes --skip-hedera-skills
 ```
 
 ---

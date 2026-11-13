@@ -68,7 +68,7 @@ export function parseArgumentsIntoOptions(rawArgs: Args): {
   const program = new Command();
 
   program
-    .name("create-scaffold-hbar")
+    .name("scaffold-hbar")
     .description("Scaffold a Hedera dApp project")
     .version(packageJson.version, "-v, --version", "Print CLI version and exit")
     .argument("[project-name]", "Name / path of the project directory to create")

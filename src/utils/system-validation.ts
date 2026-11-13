@@ -146,18 +146,32 @@ export const validateFoundry = async () => {
   console.log(chalk.green(`✔ Foundry ${reinstalled.version} ready.`));
 };
 
+/**
+ * Checks a Node version string (`v22.23.4` or `22.23.4`) against the floor.
+ * Returns the error to report, or `null` when the version is acceptable.
+ */
+export const nodeVersionError = (version: string): string | null => {
+  const clean = version.replace(/^v/, "");
+  if (!semver.valid(clean)) {
+    return `Could not read the Node.js version (got "${version}"). Please install Node.js >= ${REQUIRED_NODE_VERSION}`;
+  }
+  return semver.lt(clean, REQUIRED_NODE_VERSION)
+    ? `Node.js version must be >= ${REQUIRED_NODE_VERSION}. Current version: ${version}`
+    : null;
+};
+
 /** Node.js + Git checks that every scaffold path needs. */
 export const checkCoreSystemRequirements = async (): Promise<{ errors: string[] }> => {
   const errors: string[] = [];
 
-  try {
-    const { stdout: nodeVersion } = await execa("node", ["--version"]);
-    const cleanNodeVersion = nodeVersion.replace("v", "");
-    if (semver.lt(cleanNodeVersion, REQUIRED_NODE_VERSION)) {
-      errors.push(`Node.js version must be >= ${REQUIRED_NODE_VERSION}. Current version: ${nodeVersion}`);
-    }
-  } catch {
-    errors.push(`Node.js is not installed. Please install Node.js >= ${REQUIRED_NODE_VERSION}`);
+  // `process.version` is the runtime actually executing this CLI. Shelling out to
+  // `node --version` would instead report whichever `node` comes first on PATH, which
+  // is a different thing entirely under nvm/mise/Volta — and wrong in both directions:
+  // it rejects a supported runtime invoked by absolute path, and lets an unsupported
+  // one through when a newer `node` happens to be earlier on PATH.
+  const nodeError = nodeVersionError(process.version);
+  if (nodeError) {
+    errors.push(nodeError);
   }
 
   try {

@@ -2,10 +2,10 @@ import { execa } from "execa";
 import { type TaskCommandTask } from "../utils/run-task-command";
 import packageJson from "../../package.json";
 
-const createScaffoldHbarVersion = packageJson.version;
+const scaffoldHbarVersion = packageJson.version;
 
 /**
- * Stages all files and creates the initial commit (message: create-scaffold-hbar branding).
+ * Stages all files and creates the initial commit (message: scaffold-hbar branding).
  * Foundry lib submodules are already in place by now — see installFoundryLibraries — so the
  * single `git add -A` below captures them without any amend.
  *
@@ -18,13 +18,7 @@ export async function createFirstGitCommit(targetDir: string, task: TaskCommandT
     await execa("git", ["add", "-A"], { cwd: targetDir });
     await execa(
       "git",
-      [
-        "commit",
-        "-m",
-        `Initial commit with create-scaffold-hbar @ ${createScaffoldHbarVersion}`,
-        "--no-verify",
-        "--no-gpg-sign",
-      ],
+      ["commit", "-m", `Initial commit with scaffold-hbar @ ${scaffoldHbarVersion}`, "--no-verify", "--no-gpg-sign"],
       { cwd: targetDir },
     );
   } catch (e: any) {

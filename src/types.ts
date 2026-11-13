@@ -136,14 +136,21 @@ const TemplateManifestBlockSchema = z.object({
   outro: TemplateOutroSchema.optional(),
 });
 
+/**
+ * Former spellings of the manifest block key, newest first so that a manifest
+ * carrying more than one spelling keeps the newest.
+ */
+const LEGACY_MANIFEST_BLOCK_KEYS = ["create-scaffold-hbar", "create-hbar"] as const;
+
 function normalizeTemplateManifestRaw(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const o = { ...(raw as Record<string, unknown>) };
-  if ("create-hbar" in o) {
-    if (!("create-scaffold-hbar" in o)) {
-      o["create-scaffold-hbar"] = o["create-hbar"];
+  for (const legacy of LEGACY_MANIFEST_BLOCK_KEYS) {
+    if (!(legacy in o)) continue;
+    if (!("scaffold-hbar" in o)) {
+      o["scaffold-hbar"] = o[legacy];
     }
-    delete o["create-hbar"];
+    delete o[legacy];
   }
   return o;
 }
@@ -152,8 +159,8 @@ function normalizeTemplateManifestRaw(raw: unknown): unknown {
  * Zod schema for `template.json` manifests shipped with each starter template.
  * Validated at runtime after the template is downloaded/copied.
  *
- * Legacy manifests may use the `create-hbar` key; it is normalized to
- * `create-scaffold-hbar` before validation.
+ * Legacy manifests may use the `create-scaffold-hbar` or `create-hbar` keys;
+ * both are normalized to `scaffold-hbar` before validation.
  */
 export const TemplateManifestSchema = z.preprocess(
   normalizeTemplateManifestRaw,
@@ -161,7 +168,7 @@ export const TemplateManifestSchema = z.preprocess(
     name: z.string().min(1),
     description: z.string().optional(),
     version: z.string().optional(),
-    "create-scaffold-hbar": TemplateManifestBlockSchema.optional(),
+    "scaffold-hbar": TemplateManifestBlockSchema.optional(),
   }),
 );
 

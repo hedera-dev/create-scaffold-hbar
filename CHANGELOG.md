@@ -1,4 +1,4 @@
-# create-scaffold-hbar
+# scaffold-hbar
 
 ## 0.5.0
 
