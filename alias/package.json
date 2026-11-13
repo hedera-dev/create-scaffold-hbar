@@ -1,6 +1,6 @@
 {
   "name": "create-scaffold-hbar",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Alias for scaffold-hbar, kept so `npm create scaffold-hbar` keeps working. Prefer `npx scaffold-hbar@latest`.",
   "repository": {
     "type": "git",
@@ -15,6 +15,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "scaffold-hbar": "1.0.0"
+    "scaffold-hbar": "1.1.0"
   }
 }
