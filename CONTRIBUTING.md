@@ -139,16 +139,18 @@ Skipping the second step is not fatal — `npm create scaffold-hbar` keeps worki
 serves the previous release until the alias catches up.
 
 The alias is **deprecated on npm**, and deprecation is per-version metadata: the version
-`yarn alias:publish` just pushed is *not* deprecated, so publishing silently undoes it.
-Re-apply it to the new version every time:
+`npm publish ./alias` pushes is *not* deprecated, so publishing would silently undo it.
+`yarn alias:publish` therefore re-applies it as its last step, via
+`scripts/deprecate-alias.js` — so this is not a chore anyone has to remember. That script
+holds the message users see; change it in one place. If the deprecate step fails the
+publish has still happened, and it prints the single command to re-run.
 
-```bash
-npm deprecate create-scaffold-hbar@<version> "Use 'npx scaffold-hbar@latest' instead."
-```
-
-Deprecating the alias is deliberate — see the install note in `README.md`. It warns on
-`npm create scaffold-hbar` too, since the warning is emitted when npm installs the
-package, before any of our code runs. The package itself must stay published forever.
+Deprecating the alias is deliberate — see the install note in `README.md`. npm's own
+warning also reaches `npm create scaffold-hbar`, because it is emitted when npm installs
+the package, before any of our code runs, so it cannot be limited to the direct route.
+That is fine: the advice is the same either way. npm's warning is also only one line that
+scrolls past, and it is skipped entirely on a warm npx cache, so `alias/bin.js` prints the
+notice users actually read. The package itself must stay published forever.
 
 ## Developer Guide
 
