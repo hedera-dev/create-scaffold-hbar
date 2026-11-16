@@ -13,6 +13,9 @@
   "files": [
     "bin.js"
   ],
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "license": "MIT",
   "dependencies": {
     "scaffold-hbar": "1.1.0"

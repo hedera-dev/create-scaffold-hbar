@@ -15,6 +15,9 @@
     "dist",
     "bin"
   ],
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit && node scripts/write-bin.js",
     "dev": "rollup -c rollup.config.js --watch",

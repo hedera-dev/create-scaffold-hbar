@@ -81,10 +81,11 @@ Create a new Hedera dApp without cloning this repo:
 npx scaffold-hbar@latest
 ```
 
-`npm create scaffold-hbar@latest` runs the same CLI — `npm create <x>` resolves to
-`create-<x>`, and [`create-scaffold-hbar`](https://www.npmjs.com/package/create-scaffold-hbar)
-stays published as a thin alias for exactly that reason. Prefer `npx`: it needs no `--`
-before flags.
+`npm create scaffold-hbar@latest` still works as a legacy fallback: `npm create <x>`
+resolves to `create-<x>`, so [`create-scaffold-hbar`](https://www.npmjs.com/package/create-scaffold-hbar)
+stays published as a thin alias and always will. That alias is **deprecated** on npm, so
+going through it prints a deprecation warning on install, and it needs a `--` before
+flags. Prefer `npx scaffold-hbar@latest`.
 
 You’ll get interactive prompts for all projects' options. A prompt is skipped when the chosen template allows only one answer.
 
