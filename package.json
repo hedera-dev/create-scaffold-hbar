@@ -15,6 +15,9 @@
     "dist",
     "bin"
   ],
+  "engines": {
+    "node": ">=22.23.4"
+  },
   "scripts": {
     "build": "rollup -c rollup.config.js --forceExit && node scripts/write-bin.js",
     "dev": "rollup -c rollup.config.js --watch",
@@ -27,7 +30,8 @@
     "type-check": "tsc --noEmit",
     "changeset:release": "yarn build && changeset publish",
     "alias:sync": "node scripts/sync-alias-version.js",
-    "alias:publish": "yarn alias:sync && npm publish ./alias"
+    "alias:publish": "yarn alias:sync && npm publish ./alias && yarn alias:deprecate",
+    "alias:deprecate": "node scripts/deprecate-alias.js"
   },
   "keywords": [
     "cli",
