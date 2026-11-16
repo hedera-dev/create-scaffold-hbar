@@ -28,6 +28,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
+    "changeset:version": "changeset version && yarn alias:sync",
     "changeset:release": "yarn build && changeset publish",
     "alias:sync": "node scripts/sync-alias-version.js",
     "alias:publish": "yarn alias:sync && npm publish ./alias && yarn alias:deprecate",
