@@ -128,21 +128,33 @@ If your PR is making changes to an area that already has a changeset (e.g. there
 `npm create scaffold-hbar` resolves to `create-scaffold-hbar`, so that name is still
 published as a thin alias of this package (see `alias/`). It has to be published
 **after** the main package, because it pins an exact dependency on the version that
-release just put on the registry:
+release just put on the registry.
+
+The full release, in order:
 
 ```bash
+yarn changeset:version   # bumps the version, writes CHANGELOG, syncs alias/ to match
+git commit -s -am "chore: release scaffold-hbar <version>"
 yarn changeset:release   # publishes scaffold-hbar
-yarn alias:publish       # syncs alias/ to the new version, then publishes it
+yarn alias:publish       # publishes the alias, then re-applies the deprecation
+git push --follow-tags origin main
 ```
 
-Skipping the second step is not fatal — `npm create scaffold-hbar` keeps working, but
+Use `yarn changeset:version`, not `changeset version` on its own: it also runs
+`alias:sync`, so the alias version and its exact dependency pin land in the release
+commit. `alias:publish` syncs again, harmlessly — but if the bump is not committed, git
+claims the previous version while npm serves the new one.
+
+Skipping `alias:publish` is not fatal — `npm create scaffold-hbar` keeps working, but
 serves the previous release until the alias catches up.
 
-The alias is **deprecated on npm**, and deprecation is per-version metadata: the version
-`npm publish ./alias` pushes is *not* deprecated, so publishing would silently undo it.
+The alias is **deprecated on npm**, and deprecation is per-version metadata: a freshly
+published version is *not* deprecated, so publishing would silently undo it.
 `yarn alias:publish` therefore re-applies it as its last step, via
 `scripts/deprecate-alias.js` — so this is not a chore anyone has to remember. That script
-holds the message users see; change it in one place. If the deprecate step fails the
+deprecates the **bare package name**, which covers both the new release and every older
+version, so it is idempotent and does not depend on the steps running in any order. It
+also holds the message users see; change it in one place. If the deprecate step fails the
 publish has still happened, and it prints the single command to re-run.
 
 Deprecating the alias is deliberate — see the install note in `README.md`. npm's own
